@@ -31,8 +31,7 @@ function()
                     end
 
                     return false
-                end,
-                xOffset = 20
+                end
             },
             color_dependencies = { "currentPower", "maxPower" },
             color = function(cache, event, ...)

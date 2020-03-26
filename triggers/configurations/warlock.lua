@@ -4,7 +4,7 @@ function()
             currentPower_events = { "UNIT_POWER_FREQUENT" },
             currentPower = function(cache, event, ...)
                 cache.currentPower = UnitPower("player", Enum.PowerType.SoulShards, true) 
-                return true, cache.currentPower / (cache.maxPower or 1)
+                return true, cache.currentPower
             end,
             maxPower = function(cache, event, ...) 
                 cache.maxPower = UnitPowerMax("player", Enum.PowerType.SoulShards, true)

@@ -32,7 +32,7 @@ end
 function DefaultUpdateCurrentPowerHandler(cache, event, unit, powerType)
     if event == "INITIAL" or (unit == "player" and aura_env.convertPowerTypeStringToEnumValue(powerType) == cache.powerType) then 
         cache.currentPower = UnitPower("player", cache.powerType)
-        return true, cache.currentPower / cache.maxPower
+        return true, cache.currentPower
     end
 
     return false
@@ -41,7 +41,7 @@ end
 function DefaultUpdateMaxPowerHandler(cache, event, unit, powerType)
     if event == "INITIAL" or (unit == "player" and aura_env.convertPowerTypeStringToEnumValue(powerType) == cache.powerType) then 
         cache.maxPower = UnitPowerMax("player", cache.powerType)
-        return true, cache.currentPower / cache.maxPower
+        return true, cache.maxPower
     end
 
     return false
@@ -455,7 +455,7 @@ function InitializeClassBar()
     end
 
     InitializeBarProperties()
-    aura_env.handleCombatStateChangEvent("INITIALIZE")
+    aura_env.handleCombatStateChangEvent("INITIAL")
 end
 
 -- refresher functions
@@ -464,10 +464,12 @@ function RefreshBarValue(barName, progressBar, path, property, resolver, event, 
     local shouldUpdate, newValue, frameUpdates = resolver(progressBar.cache, event, ...)
 
     if shouldUpdate then
-        if property == 'currentPower' or property == 'maxPower' then
-            progressBar.main:SetValue(newValue)
+        if property == 'currentPower' then
+            progressBar.main:SetValue(newValue / progressBar.cache.maxPower)
+        elseif property == 'maxPower' then
+            progressBar.main:SetValue(progressBar.cache.currentPower / newValue)
         elseif property == 'next' then
-            progressBar.prediction:SetValue(newValue)
+            progressBar.prediction:SetValue(newValue / progressBar.cache.maxPower)
         end
     end
 

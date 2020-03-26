@@ -20,7 +20,7 @@ function()
                     cache.duration = duration
                     cache.expirationTime = expirationTime
                     cache.count = count
-                    cache.currentPower = ((expirationTime - GetTime()) / duration) / cache.maxPower
+                    cache.currentPower = (expirationTime - GetTime()) / duration
 
                     return true, cache.currentPower, count ~= 0
                 elseif event == "COMBAT_LOG_EVENT_UNFILTERED" and select(4, ...) == WeakAuras.myGUID and select(12, ...) == 53390 then  
@@ -31,7 +31,7 @@ function()
                         cache.duration = duration
                         cache.expirationTime = expirationTime
                         cache.count = count
-                        cache.currentPower = ((expirationTime - GetTime()) / duration) / cache.maxPower
+                        cache.currentPower = (expirationTime - GetTime()) / duration
                         return true, cache.currentPower, true
                     elseif subevent == "SPELL_AURA_REMOVED" then
                         cache.duration = 0

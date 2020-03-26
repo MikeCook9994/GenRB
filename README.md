@@ -1,0 +1,169 @@
+# CONFIGURATION DOCUMENTATION
+
+This repository contains the Initialization code, triggers, and configugrations (which become triggers) for the generic 
+resource bar (GenRB) weakaura found [here](https://wago.io/6oXyqC5pR). This weakaura provides the framework for
+quickly spinning up class and spec resource bars that can track resources, cooldowns, auras, etc... using the 
+configuration defined below. Simply adding a status trigger with a bogus event (this forces the configuration to be picked up by the weakaura) to the weakaura with your configuration will cause the configuration to be used to draw the frames.
+
+## Contract
+```lua
+function()
+-- note that you can class specific configurations in which case you drop _specialization in the property name below (e.g. specConfigurations.class)
+aura_env.specConfigurations.class_specialization = {
+    primary* = {
+        text* = {
+            enabled = boolean or function(): boolean,
+            value* = function(): string
+            color* = rgba or function(): rgba,
+            font = string,
+            size = number,
+            outline = string,
+            xOffset = number,
+            yOffset = number
+        },
+        powerType* = PowerType Enum or function(): Enum.PowerType value,
+        currentPower* = function(): current power ratio,
+        maxPower* = number or function(): number,
+        color* = rgba or function(): rgba,
+        texture* = string,
+        tickMarks = {
+            texture = string,
+            color* = rgba or function(): rgba
+            offsets = {
+                id = {
+                    enabled* = boolean or function(): boolean,
+                    resourceValue = number or function(): number,
+                    color = rgba or function(): rgba
+                } or { 
+                    number
+                }
+            } or function(): { number or tickMarkConfig }
+        },
+        prediction = {
+            enabled* = boolean or function(): boolean,
+            color* = rgba or function(): rgba,
+            next = function(): number
+        }
+    },
+    top* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    bottom* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    top_left* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    top_right* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    bottom_left* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    bottom_right* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+}
+```
+
+### QUICK NOTES
+* note that technically all bars are optional. If you don't even provide a primary bar, 
+by default the primary bar will track the default power for the spec
+* _property_ = x __or__ y indicates the value can be provided in either format
+* _propertyName*_ indicates a strictly optional value (not dependent on the presence of other values). 
+* If an enabled property is not provided it will be enabled
+* the primary bar cannot be disabled
+* If powerType is provided, currentPower/maxPower will be ignored and the default current and max power values for that power type will be used. If neither is provided the result of UnitPowerType("player") will be used as the powerType for the bar
+* tickMarks can have a color that can be overridden by a color on individual objects
+* tick marks can be dynamically generated in either format by functions, please avoid this behavior if it is expected that your tick marks will frequently change. It is bad practice to generate frames in excess. 
+
+### DEFAULTS
+
+Tick marks will default to white color. Bars will default to the color of that powertype.
+
+| property | value |
+|---|---|
+| bar texture | Interface/Addons/SharedMedia/statusbar/Cilo |
+| tick mark texture | Interface/Addons/SharedMedia/statusbar/Aluminium |
+| font type | Friz Quadrata TT |
+| font size | 14 |
+| font options | outline |
+
+## DEFINING EVENT HANDLERS
+
+You can specify a function as an event handler in your configuration wherever the configuration template specifies `function(): boolean` as an accepted value. Event handlers all have a fixed set of inputs (arguments) and outputs (return values). They are passed into and returned from the function in the order described in the table below
+
+| output | type | description |
+|---|---|---|
+| cache | table | see the [THE CACHE OBJECT](#the-cache-object) documentation below |
+| event | string | the name of the event |
+| args | defined by wow api |the events args | 
+
+| output | type | description |
+|---|---|---|
+| shouldUpdate | boolean | true if the related entity should be updated. Not all instances of an event may require an update of the bar |
+| value | * | the value to update the bar with. If shouldUpdate is false, this value need not be provided
+| processFrameUpdates | boolean | if true, indicates this function should be called every fame until the function returns false or nil for this value. This allows us to track auras and spell cooldowns that do not have events associated with their progress.
+
+#### THE "INITIAL" EVENT
+
+All entities must (or should be) be initialized to some value. Because many entities will have values resolved via event handlers, it's required that event handlers can provide an initial value without any event. This is because it's possible, and even likely, that the event your handler is subscribed to will never fire. 
+
+For example, If you listen for "PLAYER_TALENT_UPDATE", this is not likely to happen in any reasonable time relative to the bar's initialization. It would be annoying to require yourself to change talents every time you log into the game or load a new zone just to make your bar look appropiate. 
+
+This may result in some extra code and conditional logic in our configuration up front, but makes our experience much nicer.
+
+To handle the initial event, your event handler should be prepared to return a reasonable value when passed an event named "INITIAL". Just like all other events, it will receive the cache object
+
+#### THE CACHE OBJECT
+
+Each bar (top, bottom, primary, etc...) maintains a cache of objects that your configuration is free to write to and red from. During initialization it is populated with the following:
+* powerType (this may just be the specs default powerType if your bar is tracking an aura or cd)
+* currentPower
+* maxPower
+
+If you define currentPower, maxPower, and/or powerType functions they will be called during cache initialization with the __"INITIAL"__ event as explained above. 
+
+The cache is also just a scratch area where you are free to stick any state you want to pass from event handler to event handler.
+
+### SPECIFYING EVENTS OR DEPENDENCIES IN YOUR CONFIGURATION
+
+Wherever you specify an event handler you can define the events it's registered by specifying a property of the form `property_event`.
+
+```lua
+    {
+        primary = {
+            text = {
+                -- here are the events that the value's function will be called for
+                value_events = { "UNIT_SPELLCAST_START" } 
+                value = function(cache, event, ...)
+                    -- handle the events, return a value
+                end
+            ...
+        ...
+    ...
+```
+
+To solve problems with ordering where you want to ensure one property is updated after another (e.g. a text event handler may be strictly dependent on the currentPower event handler), you can instead (or additionally) specify dependencies. Instead of listening for a wow game event you're stating that this property is dependent on some other property and when it is updated, call this event handler. When a function is called as a dependency, it gets all the event data that the event handler it's dependent got.
+
+The syntax is functionally the same as specifying events. The `property_dependencies` table specifies the properties in the configuration it is dependent on. It may only depend on properties within the same bar. examples include: `currentPower`, `maxPower`, or `next` 
+
+```lua
+    {
+        primary = {
+            text = {
+                -- here are the dependencies that will cause the defined function to be called after they are updated
+                value_dependencies = { "currentPower" } 
+                value = function(cache, event, ...)
+                    -- handle the events, return a value
+                end
+            ...
+        ...
+    ...
+```

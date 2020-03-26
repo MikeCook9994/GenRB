@@ -71,7 +71,7 @@ function()
                         cache.predictedPower = math.max(cache.predictedPower, 0)
                         cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
                         
-                        return true, cache.predictedPower / cache.maxPower
+                        return true, cache.predictedPower
                     end
 
                     local unit = select(1, ...)
@@ -93,7 +93,7 @@ function()
                         cache.predictedPower = math.max(cache.predictedPower, 0)
                         cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
                         
-                        return true, cache.predictedPower / cache.maxPower
+                        return true, cache.predictedPower
                     end
 
                     return false
