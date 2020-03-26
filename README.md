@@ -8,68 +8,69 @@ configuration defined below. Simply adding a status trigger with a bogus event (
 ## Contract
 ```lua
 function()
--- note that you can class specific configurations in which case you drop _specialization in the property name below (e.g. specConfigurations.class)
-aura_env.specConfigurations.class_specialization = {
-    primary* = {
-        text* = {
-            enabled = boolean or function(): boolean,
-            value* = function(): string
+    -- note that you can class specific configurations in which case you drop _specialization in the property name below (e.g. specConfigurations.class)
+    aura_env.specConfigurations.class_specialization = {
+        primary* = {
+            text* = {
+                enabled = boolean or function(): boolean,
+                value* = function(): string
+                color* = rgba or function(): rgba,
+                font = string,
+                size = number,
+                outline = string,
+                xOffset = number,
+                yOffset = number
+            },
+            powerType* = PowerType Enum or function(): Enum.PowerType value,
+            currentPower* = function(): number,
+            maxPower* = number or function(): number,
             color* = rgba or function(): rgba,
-            font = string,
-            size = number,
-            outline = string,
-            xOffset = number,
-            yOffset = number
+            texture* = string,
+            tickMarks = {
+                texture = string,
+                color* = rgba or function(): rgba
+                offsets = {
+                    id = {
+                        enabled* = boolean or function(): boolean,
+                        resourceValue = number or function(): number,
+                        color = rgba or function(): rgba
+                    } or { 
+                        number
+                    }
+                } or function(): { number or tickMarkConfig }
+            },
+            prediction = {
+                enabled* = boolean or function(): boolean,
+                color* = rgba or function(): rgba,
+                next = function(): number
+            }
         },
-        powerType* = PowerType Enum or function(): Enum.PowerType value,
-        currentPower* = function(): current power ratio,
-        maxPower* = number or function(): number,
-        color* = rgba or function(): rgba,
-        texture* = string,
-        tickMarks = {
-            texture = string,
-            color* = rgba or function(): rgba
-            offsets = {
-                id = {
-                    enabled* = boolean or function(): boolean,
-                    resourceValue = number or function(): number,
-                    color = rgba or function(): rgba
-                } or { 
-                    number
-                }
-            } or function(): { number or tickMarkConfig }
+        top* = { 
+            -- identical to primary
+            -- supports enabled property using same schema as other enabled properties 
         },
-        prediction = {
-            enabled* = boolean or function(): boolean,
-            color* = rgba or function(): rgba,
-            next = function(): number
-        }
-    },
-    top* = { 
-        -- identical to primary
-        -- supports enabled property using same schema as other enabled properties 
-    },
-    bottom* = { 
-        -- identical to primary
-        -- supports enabled property using same schema as other enabled properties 
-    },
-    top_left* = { 
-        -- identical to primary
-        -- supports enabled property using same schema as other enabled properties 
-    },
-    top_right* = { 
-        -- identical to primary
-        -- supports enabled property using same schema as other enabled properties 
-    },
-    bottom_left* = { 
-        -- identical to primary
-        -- supports enabled property using same schema as other enabled properties 
-    },
-    bottom_right* = { 
-        -- identical to primary
-        -- supports enabled property using same schema as other enabled properties 
-    },
-}
+        bottom* = { 
+            -- identical to primary
+            -- supports enabled property using same schema as other enabled properties 
+        },
+        top_left* = { 
+            -- identical to primary
+            -- supports enabled property using same schema as other enabled properties 
+        },
+        top_right* = { 
+            -- identical to primary
+            -- supports enabled property using same schema as other enabled properties 
+        },
+        bottom_left* = { 
+            -- identical to primary
+            -- supports enabled property using same schema as other enabled properties 
+        },
+        bottom_right* = { 
+            -- identical to primary
+            -- supports enabled property using same schema as other enabled properties 
+        },
+    }
+end
 ```
 
 ### QUICK NOTES
@@ -108,8 +109,24 @@ You can specify a function as an event handler in your configuration wherever th
 | output | type | description |
 |---|---|---|
 | shouldUpdate | boolean | true if the related entity should be updated. Not all instances of an event may require an update of the bar |
-| value | * | the value to update the bar with. If shouldUpdate is false, this value need not be provided
+| value | * | the value to update the bar with. See [EVENT HANDLER RETURN TYPES](#event-handler-return-types)
 | processFrameUpdates | boolean | if true, indicates this function should be called every fame until the function returns false or nil for this value. This allows us to track auras and spell cooldowns that do not have events associated with their progress.
+
+#### EVENT HANDLER RETURN TYPES
+
+The above table defines the the return type should be for each property that accepts an event handler in the configuration template above
+
+| property | type | description |
+|---|---|---|
+| enabled | boolean | indicates whether the frame and all of its children should be displayed |
+| value | string | the actual text value a FrontString will display |
+| color | `{ r: number, g: number, b: number, a*: number}` | a table containing red, green, blue and optionally alpha values that detail the color of a frame |
+| powerType | Enum.PowerType | https://wow.gamepedia.com/PowerType |
+| currentPower | number | the current power for the bars resource |
+| maxPower | number | the maximum power for the bars resource |
+| offsets | `{ number }` or `{ string: { enabled: boolean, resourceValue: number, color: { r: number, g: number, b: number, a*: number} } }` | a collection of tick marks that will be generated. If generating full tick mark configs, functions are NOT supported. Please use dynamic tick mark generation intelligently. It is a bad idea to carelessly generate a large number of frames. |
+| resourceValue | number | the current power value the tick mark will line up with (e.g. if resource value is 50 then the current power bar will line up with the tick mark when the current power is 50) |
+| next | number | the predicted power of the resource |
 
 #### THE "INITIAL" EVENT
 
