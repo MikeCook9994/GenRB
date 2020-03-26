@@ -98,7 +98,7 @@ Tick marks will default to white color. Bars will default to the color of that p
 
 ## DEFINING EVENT HANDLERS
 
-You can specify a function as an event handler in your configuration wherever the configuration template specifies `function(): boolean` as an accepted value. Event handlers all have a fixed set of inputs (arguments) and outputs (return values). They are passed into and returned from the function in the order described in the table below
+You can specify a function as an event handler in your configuration wherever the configuration template specifies `function(): return_type` as an accepted value. Event handlers all have a fixed set of inputs (arguments) and outputs (return values). They are passed into and returned from the function in the order described in the tables below
 
 | output | type | description |
 |---|---|---|
@@ -110,11 +110,15 @@ You can specify a function as an event handler in your configuration wherever th
 |---|---|---|
 | shouldUpdate | boolean | true if the related entity should be updated. Not all instances of an event may require an update of the bar |
 | value | * | the value to update the bar with. See [EVENT HANDLER RETURN TYPES](#event-handler-return-types)
-| processFrameUpdates | boolean | if true, indicates this function should be called every fame until the function returns false or nil for this value. This allows us to track auras and spell cooldowns that do not have events associated with their progress.
+| processFrameUpdates | boolean | if true, indicates this function should be called every fame until this event handler returns false or nil for this value. This allows us to track auras and spell cooldowns that do not have events associated with their progress. 
+
+#### FRAME UPDATES
+
+When a function is called as a frame update it receives the cache and an event named "FRAME_UPDATE". The expected outputs are the same as handling a traditional event. Events handlers are still subscribed to events when they are being updated every frame.
 
 #### EVENT HANDLER RETURN TYPES
 
-The above table defines the the return type should be for each property that accepts an event handler in the configuration template above
+The above table defines the the return type for each property that accepts an event handler in the configuration template above
 
 | property | type | description |
 |---|---|---|
@@ -130,17 +134,17 @@ The above table defines the the return type should be for each property that acc
 
 #### THE "INITIAL" EVENT
 
-All entities must (or should be) be initialized to some value. Because many entities will have values resolved via event handlers, it's required that event handlers can provide an initial value without any event. This is because it's possible, and even likely, that the event your handler is subscribed to will never fire. 
+All entities must (or should be) be initialized to some value. Because many entities will have values resolved via event handlers, it's required that event handlers can provide an initial value without any event data. This is because it's possible, and even likely, that the event your handler is subscribed to will never fire. 
 
-For example, If you listen for "PLAYER_TALENT_UPDATE", this is not likely to happen in any reasonable time relative to the bar's initialization. It would be annoying to require yourself to change talents every time you log into the game or load a new zone just to make your bar look appropiate. 
+For example, if you listen for "PLAYER_TALENT_UPDATE", it is not likely to happen in any reasonable period of time relative to the bar's initialization. It would be annoying to require yourself to change talents every time you log into the game or load a new zone just to make your bar look appropiate. 
 
 This may result in some extra code and conditional logic in our configuration up front, but makes our experience much nicer.
 
-To handle the initial event, your event handler should be prepared to return a reasonable value when passed an event named "INITIAL". Just like all other events, it will receive the cache object
+To handle the initial event, your event handler should be prepared to return a reasonable value when passed an event named "INITIAL". Just like all other events, it will receive the cache object defined below.
 
 #### THE CACHE OBJECT
 
-Each bar (top, bottom, primary, etc...) maintains a cache of objects that your configuration is free to write to and red from. During initialization it is populated with the following:
+Each bar (top, bottom, primary, etc...) maintains an object ("the cache") that your configuration is free to write to and read from. During initialization it is populated with the following:
 * powerType (this may just be the specs default powerType if your bar is tracking an aura or cd)
 * currentPower
 * maxPower
@@ -151,7 +155,7 @@ The cache is also just a scratch area where you are free to stick any state you 
 
 ### SPECIFYING EVENTS OR DEPENDENCIES IN YOUR CONFIGURATION
 
-Wherever you specify an event handler you can define the events it's registered by specifying a property of the form `property_event`.
+Wherever you specify an event handler you can define the events it's registered to by specifying a property of the form `${property}_event` within the same scope block as the event handler function. 
 
 ```lua
     {
@@ -167,9 +171,9 @@ Wherever you specify an event handler you can define the events it's registered 
     ...
 ```
 
-To solve problems with ordering where you want to ensure one property is updated after another (e.g. a text event handler may be strictly dependent on the currentPower event handler), you can instead (or additionally) specify dependencies. Instead of listening for a wow game event you're stating that this property is dependent on some other property and when it is updated, call this event handler. When a function is called as a dependency, it gets all the event data that the event handler it's dependent got.
+To solve problems with ordering where you want to ensure one property is updated after another (e.g. a text event handler may be strictly dependent on the currentPower event handler), you can instead (or additionally) specify dependencies. Instead of listening for a wow game event you're stating that this property is dependent on some other property and when it (the dependeny) is updated, call this (the dependent's) event handler. When a function is called as a dependency, it gets all the cache and event data that the event handler's dependency received.
 
-The syntax is functionally the same as specifying events. The `property_dependencies` table specifies the properties in the configuration it is dependent on. It may only depend on properties within the same bar. examples include: `currentPower`, `maxPower`, or `next` 
+The syntax is functionally the same as specifying events. The `${property}_dependencies` table specifies the properties in the configuration it is dependent on. It may only depend on properties within the same bar. examples include: `currentPower`, `maxPower`, or `next` 
 
 ```lua
     {
