@@ -1,11 +1,11 @@
-aura_env.specConfigurations.druid = {
+PRD.configurations.druid = {
     primary = {
         powerType = function() 
-            if WA_GetUnitAura("player", 24858) ~= nil then
+            if PRD:GetUnitAura("player", 24858) ~= nil then
                 return Enum.PowerType.LunarPower
-            elseif WA_GetUnitAura("player", 5487) ~= nil then
+            elseif PRD:GetUnitAura("player", 5487) ~= nil then
                 return Enum.PowerType.Rage
-            elseif WA_GetUnitAura("player", 768) ~= nil then
+            elseif PRD:GetUnitAura("player", 768) ~= nil then
                 return Enum.PowerType.Energy
             end
 
@@ -22,15 +22,15 @@ aura_env.specConfigurations.druid = {
                         local feralWithGuardianAffinity = (specializationId == 103) and select(4, GetTalentInfo(3, 2, 1))
                         local restorationWithGuardianAffinity = (specializationId == 105) and select(4, GetTalentInfo(3, 3, 1))
                         local guardianSpec = specializationId == 104
-                        local bearFormWithSpenders = (WA_GetUnitAura("player", 5487) ~= nil) and (balanceWithGuardianAffinity or feralWithGuardianAffinity or restorationWithGuardianAffinity or guardianSpec)
+                        local bearFormWithSpenders = (PRD:GetUnitAura("player", 5487) ~= nil) and (balanceWithGuardianAffinity or feralWithGuardianAffinity or restorationWithGuardianAffinity or guardianSpec)
                         
                         local balanceWithFeralAffinity = (specializationId == 102) and select(4, GetTalentInfo(3, 1, 1))
                         local guardianWithFeralAffinity = (specializationId == 105) and select(4, GetTalentInfo(3, 2, 1))
                         local restorationWithFeralAffinity = (specializationId == 104) and select(4, GetTalentInfo(3, 2, 1))
                         local feralSpec = specializationId == 103
-                        local catFormWithComboPoints = (WA_GetUnitAura("player", 768) ~= nil) and (balanceWithFeralAffinity or guardianWithFeralAffinity or restorationWithFeralAffinity or feralSpec)
+                        local catFormWithComboPoints = (PRD:GetUnitAura("player", 768) ~= nil) and (balanceWithFeralAffinity or guardianWithFeralAffinity or restorationWithFeralAffinity or feralSpec)
 
-                        local balanceSpecWithMoonkinForm = (specializationId == 102) and (WA_GetUnitAura("player", 24858) ~= nil)
+                        local balanceSpecWithMoonkinForm = (specializationId == 102) and (PRD:GetUnitAura("player", 24858) ~= nil)
                         return bearFormWithSpenders or catFormWithComboPoints or balanceSpecWithMoonkinForm
                     end,
                     resourceValue = 40,
@@ -44,7 +44,7 @@ aura_env.specConfigurations.druid = {
                         local feralWithGuardianAffinity = (specializationId == 103) and select(4, GetTalentInfo(3, 2, 1))
                         local restorationWithGuardianAffinity = (specializationId == 105) and select(4, GetTalentInfo(3, 3, 1))
                         local guardianSpec = specializationId == 104
-                        return (WA_GetUnitAura("player", 5487) ~= nil) and (balanceWithGuardianAffinity or feralWithGuardianAffinity or restorationWithGuardianAffinity or guardianSpec)
+                        return (PRD:GetUnitAura("player", 5487) ~= nil) and (balanceWithGuardianAffinity or feralWithGuardianAffinity or restorationWithGuardianAffinity or guardianSpec)
                     end,
                     resourceValue = 10,
                     color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0}     
@@ -53,7 +53,7 @@ aura_env.specConfigurations.druid = {
         },
         prediction = {
             enabled = function()
-                return WA_GetUnitAura("player", 24858) ~= nil
+                return PRD:GetUnitAura("player", 24858) ~= nil
             end,
             color = function(predictedPower, maxPower) 
                 local powerTypeColor = PowerBarColor[Enum.PowerType.LunarPower]
@@ -87,7 +87,7 @@ aura_env.specConfigurations.druid = {
         },
         text = {
             value = function(currentPower, maxPower)
-                if (WA_GetUnitAura("player", 5487) ~= nil) or (WA_GetUnitAura("player", 768) ~= nil) or (WA_GetUnitAura("player", 24858) ~= nil) then
+                if (PRD:GetUnitAura("player", 5487) ~= nil) or (PRD:GetUnitAura("player", 768) ~= nil) or (PRD:GetUnitAura("player", 24858) ~= nil) then
                     return currentPower
                 end
 
@@ -112,12 +112,12 @@ aura_env.specConfigurations.druid = {
             local guardianWithFeralAffinity = (GetInspectSpecialization("player") == 104) and select(4, GetTalentInfo(3, 2, 1))
             local restorationWithFeralAffinity = (GetInspectSpecialization("player") == 105) and select(4, GetTalentInfo(3, 2, 1))
             local feralSpec = GetInspectSpecialization("player") == 103
-            return (WA_GetUnitAura("player", 768) ~= nil) and (feralSpec or balanceWithFeralAffinity or guardianWithFeralAffinity or restorationWithFeralAffinity) and true or false
+            return (PRD:GetUnitAura("player", 768) ~= nil) and (feralSpec or balanceWithFeralAffinity or guardianWithFeralAffinity or restorationWithFeralAffinity) and true or false
         end
     },
     top_left = {
         enabled = function(current, max)
-            return ((WA_GetUnitAura("player", 24858) ~= nil) or (WA_GetUnitAura("player", 197625) ~= nil)) and true or false
+            return ((PRD:GetUnitAura("player", 24858) ~= nil) or (PRD:GetUnitAura("player", 197625) ~= nil)) and true or false
         end,
         color = { r = 1.0, g = 1.0, b = 0.0, a = 1.0},
         tickMarks = {
@@ -139,7 +139,7 @@ aura_env.specConfigurations.druid = {
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Perl",
         maxPower = 3,
         currentPower = function()
-            local name, _, count, _, duration, expirationTime = WA_GetUnitAura("player", 164545)
+            local name, _, count, _, duration, expirationTime = PRD:GetUnitAura("player", 164545)
             
             if name == nil then
                 return 0
@@ -153,7 +153,7 @@ aura_env.specConfigurations.druid = {
     },
     top_right = {
         enabled = function(current, max)
-            return ((WA_GetUnitAura("player", 24858) ~= nil) or (WA_GetUnitAura("player", 197625) ~= nil)) and true or false
+            return ((PRD:GetUnitAura("player", 24858) ~= nil) or (PRD:GetUnitAura("player", 197625) ~= nil)) and true or false
         end,
         color = { r = 1.0, g = 0.0, b = 1.0, a = 1.0},
         tickMarks = {
@@ -175,7 +175,7 @@ aura_env.specConfigurations.druid = {
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Perl",
         maxPower = 3,
         currentPower = function()
-            local name, _, count, _, duration, expirationTime = WA_GetUnitAura("player", 164547)
+            local name, _, count, _, duration, expirationTime = PRD:GetUnitAura("player", 164547)
             
             if name == nil then
                 return 0
@@ -190,7 +190,7 @@ aura_env.specConfigurations.druid = {
     bottom = {
         powerType = Enum.PowerType.Mana,
         enabled = function()
-            return (WA_GetUnitAura("player", 24858) ~= nil) or (WA_GetUnitAura("player", 5487) ~= nil) or (WA_GetUnitAura("player", 768) ~= nil and GetInspectSpecialization("player") ~= 103)
+            return (PRD:GetUnitAura("player", 24858) ~= nil) or (PRD:GetUnitAura("player", 5487) ~= nil) or (PRD:GetUnitAura("player", 768) ~= nil and GetInspectSpecialization("player") ~= 103)
         end,
         tickMarks = {
             enabled = function(currentPower, maxPower)

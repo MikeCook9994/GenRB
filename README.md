@@ -7,70 +7,68 @@ configuration defined below. Simply adding a status trigger with a bogus event (
 
 ## Contract
 ```lua
-function()
-    -- note that you can class specific configurations in which case you drop _specialization in the property name below (e.g. specConfigurations.class)
-    aura_env.specConfigurations.class_specialization = {
-        primary* = {
-            text* = {
-                enabled = boolean or function(): boolean,
-                value* = function(): string
-                color* = rgba or function(): rgba,
-                font = string,
-                size = number,
-                outline = string,
-                xOffset = number,
-                yOffset = number
-            },
-            powerType* = PowerType Enum or function(): Enum.PowerType value,
-            currentPower* = function(): number,
-            maxPower* = number or function(): number,
+-- note that you can class specific configurations in which case you drop _specialization in the property name below (e.g. specConfigurations.class)
+PRD.configurations.class_specialization = {
+    primary* = {
+        text* = {
+            enabled* = boolean or function(): boolean,
+            value* = function(): string
             color* = rgba or function(): rgba,
-            texture* = string,
-            tickMarks = {
-                texture = string,
-                color* = rgba or function(): rgba
-                offsets = {
-                    id = {
-                        enabled* = boolean or function(): boolean,
-                        resourceValue = number or function(): number,
-                        color = rgba or function(): rgba
-                    } or { 
-                        number
-                    }
-                } or function(): { number or tickMarkConfig }
-            },
-            prediction = {
-                enabled* = boolean or function(): boolean,
-                color* = rgba or function(): rgba,
-                next = function(): number
-            }
+            font = string,
+            size = number,
+            outline = string,
+            xOffset = number,
+            yOffset = number
         },
-        top* = { 
-            -- identical to primary
-            -- supports enabled property using same schema as other enabled properties 
+        powerType* = PowerType Enum or function(): Enum.PowerType value,
+        currentPower* = function(): number,
+        maxPower* = number or function(): number,
+        color* = rgba or function(): rgba,
+        texture* = string,
+        tickMarks = {
+            texture = string,
+            color* = rgba or function(): rgba
+            offsets = {
+                id = {
+                    enabled* = boolean or function(): boolean,
+                    resourceValue = number or function(): number,
+                    color = rgba or function(): rgba
+                } or { 
+                    number
+                }
+            } or function(): { number or tickMarkConfig }
         },
-        bottom* = { 
-            -- identical to primary
-            -- supports enabled property using same schema as other enabled properties 
-        },
-        top_left* = { 
-            -- identical to primary
-            -- supports enabled property using same schema as other enabled properties 
-        },
-        top_right* = { 
-            -- identical to primary
-            -- supports enabled property using same schema as other enabled properties 
-        },
-        bottom_left* = { 
-            -- identical to primary
-            -- supports enabled property using same schema as other enabled properties 
-        },
-        bottom_right* = { 
-            -- identical to primary
-            -- supports enabled property using same schema as other enabled properties 
-        },
-    }
-end
+        prediction = {
+            enabled* = boolean or function(): boolean,
+            color* = rgba or function(): rgba,
+            next = function(): number
+        }
+    },
+    top* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    bottom* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    top_left* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    top_right* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    bottom_left* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+    bottom_right* = { 
+        -- identical to primary
+        -- supports enabled property using same schema as other enabled properties 
+    },
+}
 ```
 
 ### QUICK NOTES

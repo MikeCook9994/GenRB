@@ -1,5 +1,5 @@
 function InitializeRuneProgressBar(id, specBarConfig)
-    local barPositionConfig = this.progressBarPositionAndSizeConfiguration[id]
+    local barPositionConfig = this.positionAndSizeConfig[id]
 
     local progressBar = {}
 

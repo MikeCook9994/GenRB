@@ -1,4 +1,4 @@
-aura_env.specConfigurations.mage = {
+PRD.configurations.mage = {
     primary = {
         enabled = false    
     }    

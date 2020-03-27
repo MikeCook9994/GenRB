@@ -1,4 +1,4 @@
-aura_env.specConfigurations.deathknight = {
+PRD.configurations.deathknight = {
     top = {
         enabled = function(current, max)
             return current ~= 0 or UnitAffectingCombat("player")
@@ -14,7 +14,7 @@ aura_env.specConfigurations.deathknight = {
             offsets = {
                 heart_strike = {
                     resourceValue = function() 
-                        return (select(1, WA_GetUnitAura('player', 219788)) ~= nil) and 45 or 40
+                        return (select(1, PRD:GetUnitAura('player', 219788)) ~= nil) and 45 or 40
                     end,
                     color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0 }
                 },

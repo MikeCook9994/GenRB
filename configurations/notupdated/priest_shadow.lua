@@ -1,10 +1,10 @@
-aura_env.specConfigurations.priest_shadow = {
+PRD.configurations.priest_shadow = {
     primary = {
         powerType = Enum.PowerType.Insanity,
         text = {
             value = function(currentPower, maxPower)
-                local vfname, _, vfcount, _ = WA_GetUnitAura("player", 194249)
-                local liname, _, licount, _ = WA_GetUnitAura("player", 197937)
+                local vfname, _, vfcount, _ = PRD:GetUnitAura("player", 194249)
+                local liname, _, licount, _ = PRD:GetUnitAura("player", 197937)
 
     
                 if vfname ~= nil then
@@ -29,7 +29,7 @@ aura_env.specConfigurations.priest_shadow = {
         },
         prediction = {
             color = function(predictedPower, maxPower) 
-                if (predictedPower >= (select(4, GetTalentInfo(7, 1, 1)) and 60 or 90)) and WA_GetUnitAura("player", 194249) == nil then
+                if (predictedPower >= (select(4, GetTalentInfo(7, 1, 1)) and 60 or 90)) and PRD:GetUnitAura("player", 194249) == nil then
                     return { r = 1.0, g = 1.0, b = 1.0, a = 0.5}
                 end
                 
@@ -57,11 +57,11 @@ aura_env.specConfigurations.priest_shadow = {
                     predictedPowerGain = 6
                 end 
                 
-                if WA_GetUnitAura("player", 193223) ~= nil then
+                if PRD:GetUnitAura("player", 193223) ~= nil then
                     predictedPowerGain = predictedPowerGain * 2
                 end
                 
-                if WA_GetUnitAura("player", 298357) ~= nil then
+                if PRD:GetUnitAura("player", 298357) ~= nil then
                     predictedPowerGain = predictedPowerGain * 2
                 end
                 

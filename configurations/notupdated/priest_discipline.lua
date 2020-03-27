@@ -1,4 +1,4 @@
-aura_env.specConfigurations.priest_discipline = {
+PRD.configurations.priest_discipline = {
     primary = {
         text = {
             value = function(currentPower, maxPower)

@@ -1,0 +1,21 @@
+## Interface: 80300
+## Title: PRD
+## Author: Draenal
+## Version: 0.1
+## Notes: A configurable personal resource display
+## X-Category: Interface Enhancements
+## DefaultState: Enabled
+
+# PRD framework
+Init.lua
+
+# configuration helpers
+configurationHelperFunctions.lua
+
+# configurations
+configurations\rogue_outlaw.lua
+configurations\rogue.lua
+configurations\shaman_elemental.lua
+configurations\shaman_enhancement.lua
+configurations\shaman_restoration.lua
+configurations\warlock.lua

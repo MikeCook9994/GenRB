@@ -1,4 +1,4 @@
-aura_env.specConfigurations.rogue_outlaw = {
+PRD.configurations.rogue_outlaw = {
     primary = {
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0 },
