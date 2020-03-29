@@ -1,36 +1,24 @@
--- refresher functions
-
-local function RefreshCurrentPowerValue(self, path, resolver, event, ...)
+local function RefreshCurrentPowerValue(resolver, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = resolver(self.cache, event, ...)
 
     if shouldUpdate then
-        self.main:SetValue(newValue / self.cache.maxPower)
+        self:SetValue(newValue / self.cache.maxPower)
     end
 
     return shouldUpdate and frameUpdates
 end
 
-local function RefreshNextValue(self, path, resolver, event, ...)
+local function RefreshMaxPowerValue(resolver, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = resolver(self.cache, event, ...)
 
     if shouldUpdate then
-        self.main:SetValue(self.cache.currentPower / newValue)
+        self:SetValue(newValue / self.cache.maxPower)
     end
 
     return shouldUpdate and frameUpdates
 end
 
-local function RefreshMaxPowerValue(self, path, resolver, event, ...)
-    local shouldUpdate, newValue, frameUpdates = resolver(self.cache, event, ...)
-
-    if shouldUpdate then
-        self.prediction:SetValue(newValue / self.cache.maxPower)
-    end
-
-    return shouldUpdate and frameUpdates
-end
-
-local function RefreshText(self, path, resolver, event, ...)
+local function RefreshText(resolver, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = resolver(self.cache, event, ...)
 
     if shouldUpdate then
@@ -40,48 +28,31 @@ local function RefreshText(self, path, resolver, event, ...)
     return shouldUpdate and frameUpdates
 end
 
-local function RefreshEnabled(self, path, resolver, event, ...)
+local function RefreshEnabled(resolver, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = resolver(self.cache, event, ...)
 
     if shouldUpdate then
-        local frame = nil
-        if path == "text" then
-            frame = self.text
-        elseif path == "prediction" then
-            frame = self.prediction
-        elseif path == nil then
-            frame = self.main
-        elseif string.find(path, "tickMarksoffsets") then
-            frame = self.tickMarks[strsub(path, 17)]
-        end
-
-        if frame ~= nil then
-            if newValue then
-                frame:Show()
-            else 
-                frame:Hide()
-            end
+        if newValue then
+            frame:Show()
+        else 
+            frame:Hide()
         end
     end
 
     return shouldUpdate and frameUpdates
 end
 
-local function RefreshBarColor(self, path, resolver, event, ...)
+local function RefreshBarColor(resolver, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = resolver(self.cache, event, ...)
 
     if shouldUpdate then
-        if path == 'prediction' then
-            self.prediction:SetStatusBarColor(newValue.r, newValue.g, newValue.b, newValue.a or 1.0)
-        else
-            self.main:SetStatusBarColor(newValue.r, newValue.g, newValue.b, newValue.a or 1.0)
-        end
+        self:SetStatusBarColor(newValue.r, newValue.g, newValue.b, newValue.a or 1.0)
     end
 
     return shouldUpdate and frameUpdates
 end
 
-local function RefreshTextColor(self, path, resolver, event, ...) 
+local function RefreshTextColor(resolver, self, event, ...) 
     local shouldUpdate, newValue, frameUpdates = resolver(self.cache, event, ...)
 
     if shouldUpdate then
@@ -91,17 +62,29 @@ local function RefreshTextColor(self, path, resolver, event, ...)
     return shouldUpdate and frameUpdates
 end
 
-local function RefreshTickMarkColor(self, path, resolver, event, ...)
+local function RefreshTickMarksColor(resolver, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = resolver(self.cache, event, ...)
 
     if shouldUpdate then
-        self.tickMarks[strsub(path, 17)]:SetVertexColor(newValue.r, newValue.g, newValue.b, newValue.a or 1.0)
+        for _, tickMark in ipairs(self:GetChildren()) do
+            tickMark:SetVertexColor(newValue.r, newValue.g, newValue.b, newValue.a or 1.0)
+        end
     end
 
     return shouldUpdate and frameUpdates
 end
 
-local function RefreshTickMarkXOffset(self, path, resolver, event, ...)
+local function RefreshTickMarkColor(resolver, self, event, ...)
+    local shouldUpdate, newValue, frameUpdates = resolver(self.cache, event, ...)
+
+    if shouldUpdate then
+        self:SetVertexColor(newValue.r, newValue.g, newValue.b, newValue.a or 1.0)
+    end
+
+    return shouldUpdate and frameUpdates
+end
+
+local function RefreshTickMarkXOffset(resolver, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = true, resolver, nil
 
     if type(resolver) == "function" then
@@ -109,23 +92,29 @@ local function RefreshTickMarkXOffset(self, path, resolver, event, ...)
     end
 
     if shouldUpdate then
-        local tickMark = self.tickMarks[strsub(path, 17)]
-        if tickMark ~= nil then
-            tickMark:SetPoint("LEFT", self.main, "LEFT", newValue / self.cache.maxPower * self.main:GetWidth(), 0)
-        end
+        self:SetPoint("LEFT", self.main, "LEFT", (newValue / self.cache.maxPower) * PRD.width, 0)
     end
 
     return shouldUpdate and frameUpdates
 end
 
-local function NormalizeTickMarkOffsets(configs, cache)
+local function NormalizeTickMarkOffsets(configs, cache, commonColor)
     local normalizedConfigs = {}
     
     for k, v in pairs(configs) do
         if type(v) == "table" then
+            v.enabled = v.enabled or true
+            v.color = v.color or commonColor or { r = 1.0, g = 1.0, b = 1.0, a = 1.0 }
+
+            if v.resourceValue_dependencies == nil then
+                
+            end
+
             normalizedConfigs[k] = v
         else
             normalizedConfigs[v] = {
+                enabled = true,
+                color = commonColor or { r = 1.0, g = 1.0, b = 1.0, a = 1.0 },
                 resourceValue = v
             }
         end
@@ -134,7 +123,19 @@ local function NormalizeTickMarkOffsets(configs, cache)
     return normalizedConfigs
 end
 
-local function RefreshTickMarkOffsets(self, path, resolver, event, ...)
+local function GetExistingTickMark(name, self)
+    for _, child in ipairs(self:GetChildren()) do
+        if child:GetName() == name then
+            return child
+        end
+    end
+
+    return child
+end
+
+
+-- TODO: Update to use new interface for tick initialization
+local function RefreshTickMarkOffsets(resolver, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = true, resolver, nil
 
     if type(resolver) == "function" then
@@ -142,21 +143,21 @@ local function RefreshTickMarkOffsets(self, path, resolver, event, ...)
     end
 
     if shouldUpdate then
-        for id, tickMark in pairs(self.tickMarks) do
+        for _, tickMark in ipairs(self:GetChildren()) do
             tickMark:Hide()
         end
 
-        for index, tickConfig in pairs(NormalizeTickMarkOffsets(newValue, self.cache)) do
-            if self.tickMarks[index] ~= nil then
-                self.tickMarks[index]:Show()
-            else
+        for index, tickConfig in pairs(NormalizeTickMarkOffsets(newValue, self.cache, barConfiguration.tickMarks.color)) do
+            local tickMark = GetExistingTickMark(self:GetName() .. "_" .. index, self)
+            if existingTickMark == nil then
                 local barPositionConfig = self.positionConfig
                 local barConfiguration = self.configuration
                 local color = (type(barConfiguration.tickMarks.color) == "table" and barConfiguration.tickMarks.color) or { r = 1.0, g = 1.0, g = 1.0, a = 1.0 }
-                self.tickMarks[index] = InitializeTickMark(barName .. "_" .. index, self.main, barPositionConfig.tickWidth, barConfiguration.tickMarks.texture, color, 0)
+                tickMark = InitializeTickMark(self:GetName() .. "_" .. index, parent, barPositionConfig.tickWidth, barConfiguration.tickMarks.texture, color, tickConfig)
+            else
+                tickMark:SetPoint("LEFT", parent, "LEFT", (index / self.cache.maxPower) * PRD.width, 0)
             end
 
-            self.tickMarks[index]:SetPoint("LEFT", self.main, "LEFT", (index / self.cache.maxPower) * self.main:GetWidth(), 0)
         end
     end
 

@@ -1,47 +1,47 @@
 # CONFIGURATION DOCUMENTATION
 
-This repository contains the Initialization code, triggers, and configugrations (which become triggers) for the generic 
-resource bar (GenRB) weakaura found [here](https://wago.io/6oXyqC5pR). This weakaura provides the framework for
+This repository contains the source for the personal resource display (PRD) addon. This addon provides the framework for
 quickly spinning up class and spec resource bars that can track resources, cooldowns, auras, etc... using the 
-configuration defined below. Simply adding a status trigger with a bogus event (this forces the configuration to be picked up by the weakaura) to the weakaura with your configuration will cause the configuration to be used to draw the frames.
+configuration defined below. Simply adding a configuration file to the addon conforming to the below template and standards
+is all that needs to be done.
 
 ## Contract
 ```lua
--- note that you can class specific configurations in which case you drop _specialization in the property name below (e.g. specConfigurations.class)
+-- note that you can specify class specific configurations by dropping _specialization in the property name below (e.g. PRD.configurations.class)
 PRD.configurations.class_specialization = {
     primary* = {
-        text* = {
-            enabled* = boolean or function(): boolean,
-            value* = function(): string
-            color* = rgba or function(): rgba,
-            font = string,
-            size = number,
-            outline = string,
-            xOffset = number,
-            yOffset = number
-        },
         powerType* = PowerType Enum or function(): Enum.PowerType value,
         currentPower* = function(): number,
         maxPower* = number or function(): number,
         color* = rgba or function(): rgba,
         texture* = string,
+        prediction = {
+            enabled* = boolean or function(): boolean,
+            color* = rgba or function(): rgba,
+            next = function(): number
+        },
+        text* = {
+            enabled* = boolean or function(): boolean,
+            value* = function(): string
+            color* = rgba or function(): rgba,
+            font* = string,
+            size* = number,
+            flags* = string,
+            xOffset* = number,
+            yOffset* = number
+        },
         tickMarks = {
-            texture = string,
+            texture* = string,
             color* = rgba or function(): rgba
             offsets = {
                 id = {
                     enabled* = boolean or function(): boolean,
                     resourceValue = number or function(): number,
-                    color = rgba or function(): rgba
+                    color* = rgba or function(): rgba
                 } or { 
                     number
                 }
             } or function(): { number or tickMarkConfig }
-        },
-        prediction = {
-            enabled* = boolean or function(): boolean,
-            color* = rgba or function(): rgba,
-            next = function(): number
         }
     },
     top* = { 

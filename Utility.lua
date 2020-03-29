@@ -1,8 +1,5 @@
 local PRD = PRD
-
 local UnitAura = UnitAura
-
--- Unit Aura functions that return info about the first Aura matching the spellName or spellID given on the unit.
 
 function PRD:GetUnitAura(unit, spell, filter)
   if filter and not filter:upper():find("FUL") then
@@ -25,4 +22,14 @@ end
 function PRD:GetUnitDebuff(unit, spell, filter)
   filter = filter and filter.."|HARMFUL" or "HARMFUL"
   return PRD:GetUnitAura(unit, spell, filter)
+end
+
+function PRD:ConvertPowerTypeStringToEnumValue(powerType)
+  return Enum.PowerType[((" " .. string.lower(powerType)):gsub("%W%l", string.upper):sub(2)):gsub("_", "")]
+end
+
+function PRD:DebugPrint(strName, data) 
+  if ViragDevTool_AddData and PRD.debugEnabled then 
+      ViragDevTool_AddData(data, strName) 
+  end 
 end

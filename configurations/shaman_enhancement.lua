@@ -25,7 +25,7 @@ PRD.configurations.shaman_enhancement = {
         text = {
             enabled_dependencies = { "currentPower" },
             enabled = function(cache, event, ...)
-                if event == "INITIAL" or (select(1, ...) == "player" and aura_env.convertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
+                if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
                     return true, cache.currentPower > 0
                 end
 
@@ -37,7 +37,7 @@ PRD.configurations.shaman_enhancement = {
             local r, g, b, _ =  GetClassColor(select(2, UnitClass("player")))
             local color = { r = r, g = g, b = b, a = 1.0 }
 
-            if event == "INITIAL" or (select(1, ...) == "player" and aura_env.convertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
+            if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
                 if cache.currentPower == cache.maxPower then
                     return true, { r = 0.5, g = 0.0, b = 0.0, a = 1.0 }
                 elseif cache.currentPower >= cache.maxPower - 30 then
@@ -57,7 +57,7 @@ PRD.configurations.shaman_enhancement = {
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0 },
             offsets = function(cache, event, ...)
-                if event == "INITIAL" or (select(1, ...) == "player" and aura_env.convertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
+                if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
                     local resourceValues = {}
                     
                     local healingSpellCost = GetSpellPowerCost(188070)[1].cost
@@ -77,7 +77,7 @@ PRD.configurations.shaman_enhancement = {
         text = {
             value_dependencies = { "currentPower", "maxPower" },
             value = function(cache, event, ...)
-                if event == "INITIAL" or (select(1, ...) == "player" and aura_env.convertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
+                if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
                     local healingSpellCost = GetSpellPowerCost(188070)[1].cost
                     return true, math.floor(cache.currentPower / healingSpellCost)
                 end
@@ -90,7 +90,7 @@ PRD.configurations.shaman_enhancement = {
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)
-            if event == "INITIAL" or (select(1, ...) == "player" and aura_env.convertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
+            if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
                 local percent = cache.currentPower / cache.maxPower
                 return true, { r = 1.0 * (1 - percent), g = 0.0, b = 1.0 * percent, a = 1.0 }
             end
