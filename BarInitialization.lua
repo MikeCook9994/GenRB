@@ -51,6 +51,39 @@ local positionAndSizeConfig = {
     }
 }
 
+-- Default Value Resolution Functions 
+
+local function DefaultUpdateCurrentPowerHandler(cache, event, unit, powerType)
+    if event == "INITIAL" or (unit == "player" and PRD:ConvertPowerTypeStringToEnumValue(powerType) == cache.powerType) then 
+        cache.currentPower = UnitPower("player", cache.powerType)
+        return true, cache.currentPower
+    end
+
+    return false
+end
+
+local function DefaultUpdateMaxPowerHandler(cache, event, unit, powerType)
+    if event == "INITIAL" or (unit == "player" and PRD:ConvertPowerTypeStringToEnumValue(powerType) == cache.powerType) then 
+        cache.maxPower = UnitPowerMax("player", cache.powerType)
+        return true, cache.maxPower
+    end
+
+    return false
+end
+
+local function DefaultUpdateTextHandler(cache, event, unit, powerType)
+    if event == "INITIAL" or (unit == "player" and PRD:ConvertPowerTypeStringToEnumValue(powerType) == cache.powerType) then
+        -- if it's mana power type, format as percent by default
+        if cache.powerType == Enum.PowerType.Mana then
+            return true, (("%%.%df"):format(2):format((cache.currentPower / cache.maxPower)) * 100) .. "%"
+        end
+
+        return true, cache.currentPower
+    end
+
+    return false, cache.currentPower
+end
+
 -- Bar initialization
 local function InitializeBarContainer(barName, parent, positionConfig)
     local frameName = "prd_" .. barName .. "_bar_container"
@@ -156,6 +189,19 @@ local function InitializeText(barName, parent, positionConfig, font, size, flags
     return textFrame
 end
 
+local function InitializeCache(configuration)
+    local cache = {
+        powerType = 0,
+        currentPower = 0,
+        maxPower = 0
+    }
+
+    cache.powerType = (type(configuration.powerType) == "function" and select(2, configuration.powerType(cache, "INITIAL"))) or configuration.powerType
+    cache.currentPower = select(2, configuration.currentPower(cache, "INITIAL"))
+    cache.maxPower = (type(configuration.maxPower) == "function" and select(2, configuration.maxPower(cache, "INITIAL"))) or configuration.maxPower
+    return cache
+end
+
 local function InitializeProgressBar(barName, specBarConfig)
     local container = PRD.container
     local cache = InitializeCache(specBarConfig)
@@ -198,7 +244,7 @@ local function InitializeProgressBar(barName, specBarConfig)
     end
 end
 
-local function NormalizeTickMarkOffsets(configs, cache, commonColor)
+local function NormalizeTickMarkOffsets(configs, commonColor)
     local normalizedConfigs = {}
     
     for k, v in pairs(configs) do
@@ -226,7 +272,7 @@ local function NormalizeTickMarkOffsets(configs, cache, commonColor)
 end
 
 local function GetConfiguration()
-    configKey = GetConfigurationKey()
+    configKey = PRD:GetConfigurationKey()
     PRD.currentSpecKey = configKey
 
     local playerPowerType = UnitPowerType("player")
@@ -262,7 +308,7 @@ local function GetConfiguration()
         }
     end
 
-    local config = specConfigurations[configKey]
+    local config = PRD.configurations[configKey]
 
     if config.primary == nil then
         config.primary = defaultPrimaryConfig
@@ -297,72 +343,47 @@ local function GetConfiguration()
             end
         end
         
-        if barConfig.color == nil then
-            barConfig.color = { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b, 1.0}
-        end
-        
-        if barConfig.texture == nil then
-            barConfig.texture = "Interface/Addons/SharedMedia/statusbar/Cilo"
-        end
+        barConfig.color = barConfig.color == nil and { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b, 1.0} or barConfig.color
+        barConfig.texture = barConfig.texture == nil and "Interface/Addons/SharedMedia/statusbar/Cilo" or barConfig.texture
 
         -- prediction config defaults
         if barConfig.prediction ~= nil then
-            for key, value in pairs(barConfig.prediction) do
-                if value == nil then
-                    if key == "enabled" then
-                        value = true
-                    elseif key == "color" then 
-                        value = { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b, a = 0.75 }
-                    end
-                end
-            end
+            local prediction = barConfig.prediction
+            prediction.enabled = (prediction.enabled ~= nil and prediction.enabled) or true
+            prediction.color = (prediction.color ~= nil and prediction.color) or { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b, a = 0.75 }
         end
 
         -- text config defaults
         if barConfig.text ~= nil then
-            for key, value in pairs(barConfig.text) do
-                if value == nil then
-                    if key == "enabled" then
-                        value = true
-                    elseif key == "value" then
-                        barConfig.text.value_dependencies = { "currentPower" }
-                        value = DefaultUpdateTextHandler
-                    elseif key == "color" then
-                        value = { r = 1.0, g = 1.0, b = 1.0, a = 1.0 }
-                    elseif key == "font" then
-                        value = "Fonts\\FRIZQT__.TTF"
-                    elseif key == "size" then
-                        value = 14
-                    elseif key == "flags" then
-                        value = "OUTLINE"
-                    elseif key == "xOffset" then
-                        value = 0
-                    elseif key == "yOffset" then
-                        value = 0
-                    end
-                end
-            end 
+            local text = barConfig.text
+            text.enabled = (text.enabled ~= nil and text.enabled) or true
+            text.color = (text.color ~= nil and text.color) or { r = 1.0, g = 1.0, b = 1.0, a = 1.0 }
+            text.font = (text.font ~= nil and text.font) or "Fonts\\FRIZQT__.TTF"
+            text.size = (text.size ~= nil and text.size) or 14
+            text.flags = (text.flags ~= nil and text.flags) or "OUTLINE"
+            text.xOffset = (text.xOffset ~= nil and text.xOffset) or 0
+            text.yOffset = (text.yOffset ~= nil and text.yOffset) or 0
+            
+            if text.value == nil then 
+                text.value = DefaultUpdateTextHandler
+                text.value_dependencies = { "currentPower" }
+            end
         end
 
         -- tick mark config default
         if barConfig.tickMarks ~= nil then
-            for key, value in pairs(propertyConfig.tickMarks) do
-                if value == nil then
-                    if key == "texture" then
-                        value = "Interface/Addons/SharedMedia/statusbar/Aluminium"
-                    elseif key == "color" then
-                        value = { r = 1.0, g = 1.0, b = 1.0, a = 1.0 }
-                    end
-                elseif key == "offsets" and type(value) == "function" then
-                    if propertyConfig.tickMarks.offsets_dependencies == nil then
-                        propertyConfig.tickMarks.offsets_dependencies = { "maxPower" }
-                    else
-                        table.insert(propertyConfig.tickMarks.offsets_dependencies, "maxPower")
-                    end
+            local tickMarks = barConfig.tickMarks
+            tickMarks.texture = (tickMarks.texture ~= nil and tickMarks.texture) or "Interface/Addons/SharedMedia/statusbar/Aluminium"
+            tickMarks.color = (tickMarks.color ~= nil and tickMarks.color) or { r = 1.0, g = 1.0, b = 1.0, a = 1.0 }
 
-                elseif key == "offsets" and type(value) == "table" then
-                    propertyConfig.tickMarks.offsets = NormalizeTickMarkOffsets()
+            if type(tickMarks.offset) == "function" then
+                if tickMarks.offsets_dependencies == nil then
+                    tickMarks.offsets_dependencies = { "maxPower" }
+                else
+                    table.insert(tickMarks.offsets_dependencies, "maxPower")
                 end
+            elseif type(tickMarks.offsets) == "table" then
+                tickMarks.offsets = NormalizeTickMarkOffsets(tickMarks.offsets, tickMarks.color)
             end
         end
     end
@@ -373,12 +394,12 @@ end
 local function Clean()
     PRD.frameUpdates = {}
 
-    for _, bar in ipairs(PRD.container:GetChildren()) do
+    for _, bar in ipairs({ PRD.container:GetChildren() }) do
         bar.dependencyHandlers = {}
-        for _, frame in ipairs(bar:GetChildren()) do
+        for _, frame in ipairs({ bar:GetChildren() }) do
             CleanFrameState(frame)
             if string.find(frame:GetName(), "tickMarkContainer") then
-                for _, tickmark in ipairs(frame:GetChildren()) do
+                for _, tickmark in ipairs({ frame:GetChildren() }) do
                     CleanFrameState(tickMark)
                 end
             end
@@ -392,27 +413,14 @@ local function CleanFrameState(frame)
     frame.eventHandlers = {}
 end
 
-local function InitializeCache(configuration)
-    local cache = {
-        powerType = 0,
-        currentPower = 0,
-        maxPower = 0
-    }
-
-    cache.powerType = (type(configuration.powerType) == "function" and select(2, configuration.powerType(cache, "INITIAL"))) or configuration.powerType
-    cache.currentPower = select(2, configuration.currentPower(cache, "INITIAL"))
-    cache.maxPower = (type(configuration.maxPower) == "function" and select(2, configuration.maxPower(cache, "INITIAL"))) or configuration.maxPower
-    return cache
-end
-
 function PRD:GetConfigurationKey()
     local className = strlower(UnitClass("player"):gsub(" ", ""))
     local specializationName = select(2, GetSpecializationInfo(GetSpecialization()))
 
     local specClassKey = className .. "_" .. strlower(specializationName)
-    if specConfigurations[specClassKey] ~= nil then   
+    if PRD.configurations[specClassKey] ~= nil then   
         return specClassKey
-    elseif specConfigurations[className] ~= nil then
+    elseif PRD.configurations[className] ~= nil then
         return className
     end
     
@@ -422,9 +430,14 @@ end
 function PRD:InitializePersonalResourceDisplay()
     Clean()
 
-    for progressBarName, progressBarConfig in pairs(GetConfiguration()) do
+    local config = GetConfiguration()
+    PRD:DebugPrint("normalized config", config)
+    
+    for progressBarName, progressBarConfig in pairs(config) do
         if type(progressBarConfig.enabled) == "function" or progressBarConfig.enabled then
             InitializeProgressBar(progressBarName, progressBarConfig)
         end
     end
+
+    PRD:DebugPrint("PRD", PRD)
 end

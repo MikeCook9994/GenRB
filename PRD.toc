@@ -6,11 +6,10 @@
 ## X-Category: Interface Enhancements
 ## DefaultState: Enabled
 
-# PRD framework
+PRD.lua
+Utility.lua
+BarInitialization.lua
 Init.lua
-
-# configuration helpers
-configurationHelperFunctions.lua
 
 # configurations
 configurations\rogue_outlaw.lua
