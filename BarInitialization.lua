@@ -52,16 +52,25 @@ local positionAndSizeConfig = {
 }
 
 -- Bar initialization
+local function InitializeBarContainer(barName, parent, positionConfig)
+    local frameName = "prd_" .. barName .. "_bar_container"
+    local barContainer = _G[frameName] or CreateFrame("Frame", frameName, parent)
+
+    barContainer:SetWidth(positionConfig.width)
+    barContainer:SetHeight(positionConfig.height)
+    barContainer:SetPoint(positionConfig.anchorPoint, parent, positionConfig.anchorPoint, 0, positionConfig.yOffset)
+    return barContainer
+end
 
 local function InitializeStatusBar(barName, parent, positionConfig, frameStrata, texture, color)
-    local frameName = id .. "_" .. barName
+    local frameName = "prd_" .. barName .. "_main_bar"
     local statusBar = _G[frameName] or CreateFrame("StatusBar", frameName, parent)
     
     statusBar:SetWidth(positionConfig.width)
     statusBar:SetHeight(positionConfig.height)
     statusBar:SetMinMaxValues(0, 1)
     statusBar:SetValue(0)
-    statusBar:SetPoint(positionConfig.anchorPoint, parent, positionConfig.anchorPoint, 0, positionConfig.yOffset)
+    statusBar:SetPoint("CENTER", parent, "CENTER", 0, 0)
     statusBar:SetFrameStrata(frameStrata)
     statusBar:SetStatusBarTexture(texture)
     statusBar:SetStatusBarColor(color.r, color.g, color.b, color.a)
@@ -71,26 +80,8 @@ local function InitializeStatusBar(barName, parent, positionConfig, frameStrata,
     return statusBar
 end
 
-local function InitializeTickMark(name, parent, tickWidth, cache, texture, color, resourceValue)
-    local frameName = id .. "_" .. name
-    local tickFrame = _G[frameName] or CreateFrame("Frame", frameName, parent)
-    
-    tickFrame:SetWidth(tickWidth)
-    tickFrame:SetHeight(parent:GetHeight())
-    tickFrame:SetPoint("LEFT", parent, "LEFT", (resourceValue / cache.maxPower) * parent:GetWidth(), 0)
-    tickFrame:SetFrameStrata("HIGH")
-    
-    tickFrame.texture = _G[frameName .. "_texture"] or tickFrame:CreateTexture(frameName .. "_texture")
-    tickFrame.texture:SetAllPoints(tickFrame)
-    tickFrame.texture:SetTexture(texture)
-    tickFrame.texture:SetVertexColor(color.r, color.g, color.b, color.a)
-    tickFrame:SetAlpha(0.5)
-    tickFrame:Show()
-    return tickFrame
-end
-
-local function InitializeBackground(name, parent)
-    local frameName = id .. "_" .. name .. "_background"
+local function InitializeBackground(barName, parent)
+    local frameName = "prd_" .. barName .. "_background_bar"
 
     if _G[frameName] ~= nil then
         return _[frameName]
@@ -112,20 +103,99 @@ local function InitializeBackground(name, parent)
     return backgroundFrame
 end
 
-local function InitializeText(name, parent, cache, font, size, flags, xOffset, yOffset, value, color)
-    local textFrameName = id .. "_" .. name .. "_text"
-    local textFrame = _G[textFrameName] or parent:CreateFontString(textFrameName)
+local function InitializeTickMarkContainer(barName, parent, width, height)
+    local frameName = "prd_" .. barName .. "_tick_mark_container"
+    local tickMarkContainer = _G[frameName] or CreateFrame("Frame", frameName, parent)
+
+    tickMarkContainer:SetWidth(width)
+    tickMarkContainer:SetHeight(height)
+    tickMarkContainer:SetPoint("CENTER", bar, "CENTER", 0, 0)
+    tickMarkContainer:SetFrameStrata("HIGH")
+    tickMarkContainer.SetAlpha(0.5)
+    tickMarkContainer:Show()
+    return tickMarkContainer
+end
+
+local function InitializeTickMark(barName, tickId, parent, tickWidth, cache, texture, color, resourceRatio)
+    local frameName = "prd_" .. barName .. "_tick_mark_" .. tickId
+    local tickFrame = _G[frameName] or CreateFrame("Frame", frameName, parent)
+    
+    tickFrame:SetWidth(tickWidth)
+    tickFrame:SetHeight(parent:GetHeight())
+    tickFrame:SetPoint("LEFT", parent, "LEFT", resourceRatio * parent:GetWidth(), 0)
+    tickFrame:SetFrameStrata("HIGH")
+    
+    tickFrame.texture = _G[frameName .. "_texture"] or tickFrame:CreateTexture(frameName .. "_texture")
+    tickFrame.texture:SetAllPoints(tickFrame)
+    tickFrame.texture:SetTexture(texture)
+    tickFrame.texture:SetVertexColor(color.r, color.g, color.b, color.a)
+    tickFrame:SetAlpha(0.5)
+    tickFrame:Show()
+    return tickFrame
+end
+
+local function InitializeText(barName, parent, positionConfig, font, size, flags, xOffset, yOffset, value, color)
+    local frameName = "prd_" .. barName .. "_text_container"
+    local textContainer = _G[frameName] or CreateFrame("Frame", frameName, parent)
+
+    textContainer:SetFrameStrata("DIALOG")
+    textContainer:SetWidth(positionConfig.width)
+    textContainer:SetHeight(positionConfig.height)
+    textContainer:SetPoint(positionConfig.anchorPoint, parent, positionConfig.anchorPoint, 0, positionConfig.yOffset)
+    textContainer:Show()
+
+    local textFrameName = "prd_" .. barName .. "_text"
+    local textFrame = _G[textFrameName] or textContainer:CreateFontString(textFrameName)
 
     textFrame:SetFont(font, size, flags)
     textFrame:SetTextColor(color.r, color.g, color.b, color.a)
-    textFrame:SetPoint("CENTER", parent, "CENTER", xOffset, yOffset)
+    textFrame:SetPoint("CENTER", textContainer, "CENTER", xOffset, yOffset)
     textFrame:SetText(value)
     textFrame:SetAlpha(0.5)
+    textFrame:Show()
     return textFrame
 end
 
-function PRD:InitializeProgressBar(id, specBarConfig)
+local function InitializeProgressBar(barName, specBarConfig)
     local container = PRD.container
+    local cache = InitializeCache(specBarConfig)
+    local positionConfig = positionAndSizeConfig[barName]
+
+    local barContainer = InitializeBarContainer(barName, container, positionConfig)
+
+    local statusBarColor = type(specBarConfig.color) == "function" and select(2, specBarConfig.color(cache, "INITIAL")) or specBarConfig.color
+    local statusBar = InitializeStatusBar(barName, barContainer, positionConfig, "MEDIUM", specBarConfig.texture, color)
+    local backgroundBar = InitializeBackground(barName, barContainer)
+
+    local text = specBarConfig.text
+    local textEnabled = (type(text.enabled) == "function" and select(2, text.enabled(cache, "INITIAL"))) or text.enabled
+
+    if textEnabled then
+        local value = select(2, text.value(cache, "INITIAL"))
+        local textColor = type(text.color) == "function" and select(2, text.color(cache, "INITIAL")) or text.color
+        local textFrame = InitializeText(barName, barContainer, positionConfig, text.font, text.size, text.flags, text.xOffset, text.yOffset, value, textColor)
+    end
+
+    local predictionEnabled = (specBarConfig.prediction ~= nil) and (type(specBarConfig.prediction.enabled) == "function" and specBarConfig.prediction.enabled(cache, "INITIAL")) or specBarConfig.prediction.enabled
+    if predictionEnabled then
+        local statusBarColor = type(specBarConfig.color) == "function" and select(2, specBarConfig.color(cache, "INITIAL")) or specBarConfig.color
+        local predictionBar = InitializeStatusBar(barName, barContainer, positionConfig, "LOW", specBarConfig.texture, color)
+    end
+
+    if specBarConfig.tickMarks ~= nil then
+        local tickMarkContainer = InitializeTickMarkContainer(barName, barContainer, positionConfig.width, positionConfig.height)
+        local texture = specBarConfig.tickMarks.texture
+        local tickMarks = type(specBarConfig.tickMarks.offsets) == "function" and select(2, specBarConfig.tickMarks.offsets(cache, "INITIAL")) or specBarConfig.tickMarks.offsets
+
+        for tickId, tickConfig in paris(tickMarks) do
+            if tickConfig.enabled ~= false then
+                local color = (tickConfig.color ~= nil and ((type(tickConfig.color) == "function" and tickConfig.color(cache, "INITIAL")) or tickConfig.color)) or ((type(specBarConfig.tickMarks.color) == "function" and specBarConfig.tickMarks.color(cache, "INITIAL")) or specBarConfig.tickMarks.color)
+                local resourceRatio = ((type(tickConfig.resourceValue) == "function" and select(2, tickConfig.resourceValue(cache, "INITIAL"))) or tickConfig.resourceValue) / cache.maxPower
+                
+                local tickMark = InitializeTickMark(barName, tickId, tickMarkContainer, positionConfig.tickWidth, texture, color, resourceRatio)
+            end
+        end
+    end
 end
 
 local function NormalizeTickMarkOffsets(configs, cache, commonColor)
@@ -209,16 +279,34 @@ local function GetConfiguration()
         if barConfig.currentPower == nil then
             barConfig.currentPower_events = { "UNIT_POWER_FREQUENT" }
             barConfig.currentPower = DefaultUpdateCurrentPowerHandler
-        elseif barConfig.maxPower == nil then
+        end
+        
+        if barConfig.maxPower == nil then
             barConfig.maxPower_events = { "UNIT_MAXPOWER" }
             barConfig.maxPower = DefaultUpdateMaxPowerHandler
-        elseif barConfig.color == nil then
+        end
+
+        -- if power type is a function current type must be reevaluated when it updates
+        -- and maxPower must be reevaluated if it's a function. But I can't imagine
+        -- a world where powerType is a function and maxPower isn't
+        if (barConfig.powerType ~=nil and type(barConfig.powerType) == "function") then
+            barConfig.currentPower_dependencies = { "powerType" }
+
+            if type(barConfig.maxPower) == "function" then
+                barConfig.maxPower_dependencies = { "powerType" }
+            end
+        end
+        
+        if barConfig.color == nil then
             barConfig.color = { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b, 1.0}
-        elseif barConfig.texture == nil then
+        end
+        
+        if barConfig.texture == nil then
             barConfig.texture = "Interface/Addons/SharedMedia/statusbar/Cilo"
+        end
 
         -- prediction config defaults
-        elseif barConfig.prediction ~= nil then
+        if barConfig.prediction ~= nil then
             for key, value in pairs(barConfig.prediction) do
                 if value == nil then
                     if key == "enabled" then
@@ -228,9 +316,10 @@ local function GetConfiguration()
                     end
                 end
             end
+        end
 
         -- text config defaults
-        elseif barConfig.text ~= nil then
+        if barConfig.text ~= nil then
             for key, value in pairs(barConfig.text) do
                 if value == nil then
                     if key == "enabled" then
@@ -253,9 +342,10 @@ local function GetConfiguration()
                     end
                 end
             end 
+        end
 
         -- tick mark config default
-        elseif barConfig.tickMarks ~= nil then
+        if barConfig.tickMarks ~= nil then
             for key, value in pairs(propertyConfig.tickMarks) do
                 if value == nil then
                     if key == "texture" then

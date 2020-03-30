@@ -11,7 +11,10 @@ PRD = {
 }
 
 function PRD:Initialize() 
-    local container = _G["prd_bar_container"] or CreateFrame("Frame")
+    local container = _G["prd_bar_container"] or CreateFrame("Frame", "prd_bar_container")
+    container:SetHeight(PRD.height)
+    container:SetWidth(PRD.width)
+    container:SetFrameStrata("BACKGROUND")
     
     -- initialization events
     container:RegisterEvent("PLAYER_ENTERING_WORLD")

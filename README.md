@@ -98,7 +98,7 @@ Tick marks will default to white color. Bars will default to the color of that p
 
 You can specify a function as an event handler in your configuration wherever the configuration template specifies `function(): return_type` as an accepted value. Event handlers all have a fixed set of inputs (arguments) and outputs (return values). They are passed into and returned from the function in the order described in the tables below
 
-| output | type | description |
+| input | type | description |
 |---|---|---|
 | cache | table | see the [THE CACHE OBJECT](#the-cache-object) documentation below |
 | event | string | the name of the event |

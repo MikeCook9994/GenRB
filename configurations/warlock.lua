@@ -21,17 +21,21 @@ PRD.configurations.warlock = {
         },
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...)
-            if 267 == select(1, GetSpecializationInfo(GetSpecialization())) then
-                if cache.currentPower >= 45 then
-                    return true, { r = 0.5, g = 0.0, b = 0.0 }
-                elseif cache.currentPower >= 40 then
-                    return true, { r = 0.75, g = 0.5, b = 0.0 }
-                elseif cache.currentPower >= 20 then
-                    return true, { r = 1.0, g = 0.5, b = 0.0 }
-                end    
+            if select(1, ...) == "player" then
+                if 267 == select(1, GetSpecializationInfo(GetSpecialization())) then
+                    if cache.currentPower >= 45 then
+                        return true, { r = 0.5, g = 0.0, b = 0.0 }
+                    elseif cache.currentPower >= 40 then
+                        return true, { r = 0.75, g = 0.5, b = 0.0 }
+                    elseif cache.currentPower >= 20 then
+                        return true, { r = 1.0, g = 0.5, b = 0.0 }
+                    end    
+                end
+    
+                return true, PowerBarColor[Enum.PowerType.SoulShards]
             end
 
-            return true, PowerBarColor[Enum.PowerType.SoulShards]
+            return false
         end 
     },
     bottom = {
