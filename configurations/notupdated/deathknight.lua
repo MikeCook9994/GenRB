@@ -36,9 +36,7 @@ PRD.configurations.deathknight = {
         color = function(elapsedCooldown, duration)
             local r, g, b, a = GetClassColor("DEATHKNIGHT")
             return { r = r, g = g, b = b, a = a }
-        end,
-        tickMarks = {
-        }
+        end
     },
     bottom = {
         enabled = function(current, maxHealth) 

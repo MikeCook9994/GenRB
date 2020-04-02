@@ -6,11 +6,10 @@ PRD.configurations.priest_shadow = {
                 local vfname, _, vfcount, _ = PRD:GetUnitAura("player", 194249)
                 local liname, _, licount, _ = PRD:GetUnitAura("player", 197937)
 
-    
                 if vfname ~= nil then
-                    return vfcount .. '                 ' .. currentPower
+                    return vfcount .. " " .. currentPower
                 elseif liname ~= nil then
-                    return licount .. '                 ' .. currentPower
+                    return licount .. " " .. currentPower
                 end
                 
                 return currentPower
@@ -41,7 +40,7 @@ PRD.configurations.priest_shadow = {
                 
                 local SpellCast = UnitCastingInfo('player')    
                 
-                if select(1, SpellCast) == GetSpellInfo(205351) then -- SW: Voidas
+                if select(1, SpellCast) == GetSpellInfo(205351) then -- SW: Void
                     predictedPowerGain = 15
                 elseif select(1, SpellCast) == GetSpellInfo(8092) then -- Mind Blast 
                     if select(4, GetTalentInfo(1, 1, 1)) then

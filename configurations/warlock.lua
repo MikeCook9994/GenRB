@@ -19,9 +19,10 @@ PRD.configurations.warlock = {
                 return true, cache.currentPower / 10
             end,
         },
+        color_events = { "PLAYER_SPECIALIZATION_CHANGED" },
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...)
-            if select(1, ...) == "player" then
+            if event == "INITIAL" or select(1, ...) == "player" then
                 if 267 == select(1, GetSpecializationInfo(GetSpecialization())) then
                     if cache.currentPower >= 45 then
                         return true, { r = 0.5, g = 0.0, b = 0.0 }

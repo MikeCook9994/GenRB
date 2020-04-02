@@ -6,4 +6,5 @@ PRD = {
     debugEnabled = true,
     frameUpdates = {},
     configurations = {},
+    bars = {}
 }
