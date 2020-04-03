@@ -33,7 +33,7 @@ function PRD:Initialize()
         end
     end)
 
-    container:SetScript("OnUpdate", function(self, event, ...)
+    C_Timer.NewTicker(.05, function()
         local PRD = PRD
         PRD:HandleFrameUpdates()
     end)

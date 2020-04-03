@@ -5,32 +5,30 @@ PRD.configurations.priest_discipline = {
     top = {
         currentPower_events = { "UNIT_SPELLCAST_SUCCEEDED" },
         currentPower = function(cache, event, ...)
-            if event == "INITIAL" or event == "FRAME_UPDATE" or (event == "UNIT_SPELLCAST_SUCCEEDED" and select(1, ...) == "player" and select(3, ...) == 194509) then
-                local currentCharges, _, start, duration = GetSpellCharges(194509)
-                PRD:DebugPrint(event, select(3, ...))
-                PRD:DebugPrint("current", currentCharges)
-                PRD:DebugPrint("start", start)
-                PRD:DebugPrint("duration", duration)
-
-                cache.currentCharges = currentCharges
-                cache.start = start
-                cache.duration = duration
-
-                if cache.currentCharges == 2 then
-                    cache.currentPower = 2
-                    return true, 2, false
-                end
-
-                cache.currentPower = currentCharges + ((GetTime() - start) / duration)
-                PRD:DebugPrint("currentPower", cache.currentPower)
-                return true, cache.currentPower, true
+            if event == "UNIT_SPELLCAST_SUCCEEDED" and (select(1, ...) ~= "player" or select(3, ...) ~= 194509) then
+                return false
             end
 
-            return false
+            PRD:DebugPrint("FRAME_UPDATE")
+            local currentCharges, _, start, duration = GetSpellCharges(194509)
+
+            cache.currentCharges = currentCharges
+            cache.start = start
+            cache.duration = duration
+
+            if event == "UNIT_SPELLCAST_SUCCEEDED" then
+                return true, cache.currentPower, true
+            elseif cache.currentCharges == 2 then
+                cache.currentPower = 2
+                return true, 2, false
+            end
+
+            cache.currentPower = currentCharges + ((GetTime() - start) / duration)
+            return true, cache.currentPower, true
         end,
         maxPower = 2,
-        text_dependencies = { "currentPower" },
         text = {
+            value_dependencies = { "currentPower" },
             value = function(cache, event, ...)
                 local currentCharges = cache.currentCharges == 0 and " " or cache.currentCharges
                 local cooldown = cache.currentCharges == 2 and "" or (("%%.%df"):format(0)):format((cache.duration - (GetTime() - cache.start)))

@@ -156,7 +156,6 @@ PRD.configurations.priest_shadow = {
                     local spellId = select(12, ...)
                     if select(4, ...) == UnitGUID("player") and (spellId == 194249 or spellId == 197937) then
                         local subevent = select(2, ...)
-                        PRD:DebugPrint(subevent, spellid)
                         if subevent == "SPELL_AURA_APPLIED" then
                             if spellId == 194249 then
                                 cache.voidFormActive = true
