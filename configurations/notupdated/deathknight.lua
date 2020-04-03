@@ -16,7 +16,7 @@ PRD.configurations.deathknight = {
                     resourceValue = function() 
                         return (select(1, PRD:GetUnitAura('player', 219788)) ~= nil) and 45 or 40
                     end,
-                    color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0 }
+                    color = { r = 0.5, g = 0.5, b = 0.5 }
                 },
             }
         }
@@ -30,12 +30,12 @@ PRD.configurations.deathknight = {
             value = function(elapsedCooldown, duration) 
                 return (("%%d"):format(0):format(duration - elapsedCooldown))
             end,
-            color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0 },
+            color = { r = 1.0, g = 1.0, b = 1.0 },
             size = 12
         },
         color = function(elapsedCooldown, duration)
-            local r, g, b, a = GetClassColor("DEATHKNIGHT")
-            return { r = r, g = g, b = b, a = a }
+            local r, g, b = GetClassColor("DEATHKNIGHT")
+            return { r = r, g = g, b = b }
         end
     },
     bottom = {
@@ -55,7 +55,7 @@ PRD.configurations.deathknight = {
         },
         color = function(currentHealth, maxHealth)
             local healthRatio = currentHealth / maxHealth
-            return { r = 1.0 - (1.0 * healthRatio), g = 1.0 * healthRatio, b = 0.0, a = 1.0}
+            return { r = 1.0 - (1.0 * healthRatio), g = 1.0 * healthRatio, b = 0.0}
         end
     }
 }

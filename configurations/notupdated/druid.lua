@@ -12,7 +12,7 @@ PRD.configurations.druid = {
             return Enum.PowerType.Mana
         end,
         tickMarks = {
-            color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0},
+            color = { r = 1.0, g = 1.0, b = 1.0},
             offsets = { 
                 iron_fur_shred_starsurge = {
                     enabled = function(current, max)
@@ -34,7 +34,7 @@ PRD.configurations.druid = {
                         return bearFormWithSpenders or catFormWithComboPoints or balanceSpecWithMoonkinForm
                     end,
                     resourceValue = 40,
-                    color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0}     
+                    color = { r = 1.0, g = 1.0, b = 1.0}     
                 },
                 frenzied_regen = {
                     enabled = function(current, max)
@@ -47,7 +47,7 @@ PRD.configurations.druid = {
                         return (PRD:GetUnitAura("player", 5487) ~= nil) and (balanceWithGuardianAffinity or feralWithGuardianAffinity or restorationWithGuardianAffinity or guardianSpec)
                     end,
                     resourceValue = 10,
-                    color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0}     
+                    color = { r = 1.0, g = 1.0, b = 1.0}     
                 }
             }
         },
@@ -57,7 +57,7 @@ PRD.configurations.druid = {
             end,
             color = function(predictedPower, maxPower) 
                 local powerTypeColor = PowerBarColor[Enum.PowerType.LunarPower]
-                return { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b, a = 0.5 } 
+                return { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } 
             end,
             next = function(currentPower, maxPower)
                 local predictedPowerGain = 0
@@ -97,9 +97,9 @@ PRD.configurations.druid = {
     },
     top = {
         powerType = Enum.PowerType.ComboPoints,
-        color = { r = 1.0, g = 0.65, b = 0.0, a = 1.0 },
+        color = { r = 1.0, g = 0.65, b = 0.0 },
         tickMarks = {
-            color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0 },
+            color = { r = 0.5, g = 0.5, b = 0.5 },
             offsets = { 1, 2, 3, 4 }
         },
         text = {
@@ -119,19 +119,19 @@ PRD.configurations.druid = {
         enabled = function(current, max)
             return ((PRD:GetUnitAura("player", 24858) ~= nil) or (PRD:GetUnitAura("player", 197625) ~= nil)) and true or false
         end,
-        color = { r = 1.0, g = 1.0, b = 0.0, a = 1.0},
+        color = { r = 1.0, g = 1.0, b = 0.0},
         tickMarks = {
             offsets = {
                 zero = {
-                    color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0},
+                    color = { r = 0.5, g = 0.5, b = 0.5},
                     resourceValue = 0
                 },
                 one = {
-                    color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0},
+                    color = { r = 1.0, g = 1.0, b = 1.0},
                     resourceValue = 1
                 },
                 two = {
-                    color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0},
+                    color = { r = 1.0, g = 1.0, b = 1.0},
                     resourceValue = 2
                 }
             }
@@ -155,19 +155,19 @@ PRD.configurations.druid = {
         enabled = function(current, max)
             return ((PRD:GetUnitAura("player", 24858) ~= nil) or (PRD:GetUnitAura("player", 197625) ~= nil)) and true or false
         end,
-        color = { r = 1.0, g = 0.0, b = 1.0, a = 1.0},
+        color = { r = 1.0, g = 0.0, b = 1.0},
         tickMarks = {
             offsets = {
                 zero = {
-                    color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0},
+                    color = { r = 0.5, g = 0.5, b = 0.5},
                     resourceValue = 0
                 },
                 one = {
-                    color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0},
+                    color = { r = 1.0, g = 1.0, b = 1.0},
                     resourceValue = 1
                 },
                 two = {
-                    color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0},
+                    color = { r = 1.0, g = 1.0, b = 1.0},
                     resourceValue = 2
                 }
             }
@@ -196,7 +196,7 @@ PRD.configurations.druid = {
             enabled = function(currentPower, maxPower)
                 return GetInspectSpecialization("player") ~= 105
             end,
-            color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0 },
+            color = { r = 0.5, g = 0.5, b = 0.5 },
             offsets = function()
                 local resourceValues = { }
                 
@@ -227,7 +227,7 @@ PRD.configurations.druid = {
         },
         color = function(currentPower, maxPower)
             local percent = currentPower / maxPower
-            return { r = 1.0 * (1 - percent), g = 0.0, b = 1.0 * percent, a = 1.0 }
+            return { r = 1.0 * (1 - percent), g = 0.0, b = 1.0 * percent }
         end
     }
 }

@@ -8,7 +8,7 @@ PRD.configurations.shaman_enhancement = {
                     resourceValue = function(cache, event, ...) 
                         return true, select(4, GetTalentInfo(6, 2, 1)) and 40 or 30
                     end,
-                    color = { r = 0.0, g = 0.75, b = 0.75, a = 1.0 }
+                    color = { r = 0.0, g = 0.75, b = 0.75 }
                 },
                 cap = {
                     resourceValue = function(cache, event, ...)
@@ -18,7 +18,7 @@ PRD.configurations.shaman_enhancement = {
 
                         return false
                     end,
-                    color = { r = 1.0, g = 0.0, b = 0.0, a = 1.0 }
+                    color = { r = 1.0, g = 0.0, b = 0.0 }
                 }
             }
         },
@@ -34,16 +34,16 @@ PRD.configurations.shaman_enhancement = {
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)
-            local r, g, b, _ =  GetClassColor(select(2, UnitClass("player")))
-            local color = { r = r, g = g, b = b, a = 1.0 }
+            local r, g, b =  GetClassColor(select(2, UnitClass("player")))
+            local color = { r = r, g = g, b = b }
 
             if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
                 if cache.currentPower == cache.maxPower then
-                    return true, { r = 0.5, g = 0.0, b = 0.0, a = 1.0 }
+                    return true, { r = 0.5, g = 0.0, b = 0.0 }
                 elseif cache.currentPower >= cache.maxPower - 30 then
-                    return true, { r = 1.0, g = 0.0, b = 0.0, a = 1.0 }
+                    return true, { r = 1.0, g = 0.0, b = 0.0 }
                 elseif cache.currentPower >= (select(4, GetTalentInfo(6, 2, 1)) and 50 or 40) then
-                    return true, { r = 1.0, g = 0.25, b = 0.0, a = 1.0 }
+                    return true, { r = 1.0, g = 0.25, b = 0.0 }
                 end
 
                 return true, color
@@ -55,7 +55,7 @@ PRD.configurations.shaman_enhancement = {
     bottom = {
         powerType = Enum.PowerType.Mana,
         tickMarks = {
-            color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0 },
+            color = { r = 0.5, g = 0.5, b = 0.5 },
             offsets = function(cache, event, ...)
                 if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
                     local resourceValues = {}
@@ -92,10 +92,10 @@ PRD.configurations.shaman_enhancement = {
         color = function(cache, event, ...)
             if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
                 local percent = cache.currentPower / cache.maxPower
-                return true, { r = 1.0 * (1 - percent), g = 0.0, b = 1.0 * percent, a = 1.0 }
+                return true, { r = 1.0 * (1 - percent), g = 0.0, b = 1.0 * percent }
             end
             
-            local r, g, b, _ = GetClassColor(select(2, UnitClass("player")))
+            local r, g, b = GetClassColor(select(2, UnitClass("player")))
             return false
         end
     }

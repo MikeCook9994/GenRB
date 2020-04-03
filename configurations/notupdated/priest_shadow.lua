@@ -17,7 +17,7 @@ PRD.configurations.priest_shadow = {
             xOffset = -40,
         },
         tickMarks = {
-            color = { r = 1.0, g = 1.0, b = 1.0, a = 1.0 },
+            color = { r = 1.0, g = 1.0, b = 1.0 },
             offsets = {
                 voidForm = {
                     resourceValue = function() 
@@ -29,11 +29,11 @@ PRD.configurations.priest_shadow = {
         prediction = {
             color = function(predictedPower, maxPower) 
                 if (predictedPower >= (select(4, GetTalentInfo(7, 1, 1)) and 60 or 90)) and PRD:GetUnitAura("player", 194249) == nil then
-                    return { r = 1.0, g = 1.0, b = 1.0, a = 0.5}
+                    return { r = 1.0, g = 1.0, b = 1.0 }
                 end
                 
                 local powerTypeColor = PowerBarColor[Enum.PowerType.Insanity]
-                return { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b, a = 0.5 } 
+                return { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } 
             end,
             next = function(currentPower, maxPower)
                 local predictedPowerGain = 0
@@ -75,7 +75,7 @@ PRD.configurations.priest_shadow = {
     bottom = {
         powerType = Enum.PowerType.Mana,
         tickMarks = {
-            color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0 },
+            color = { r = 0.5, g = 0.5, b = 0.5 },
             offsets = function()
                 local resourceValues = { }
                 
@@ -102,7 +102,7 @@ PRD.configurations.priest_shadow = {
         },
         color = function(currentPower, maxPower)
             local percent = currentPower / maxPower
-            return { r = 1.0 * (1 - percent), g = 0.0, b = 1.0 * percent, a = 1.0 }
+            return { r = 1.0 * (1 - percent), g = 0.0, b = 1.0 * percent }
         end
     }
 }

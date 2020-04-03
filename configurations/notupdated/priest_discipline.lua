@@ -33,15 +33,15 @@ PRD.configurations.priest_discipline = {
             local currentCharges, maxCharges, start, duration = GetSpellCharges(194509)
             
             if currentCharges == maxCharges then
-                return { r = 1.0, g = 0.9, b = 0.66, a = 1.0 }
+                return { r = 1.0, g = 0.9, b = 0.66 }
             elseif currentCharges == 1 then
-                return { r = 1.0, g = 0.75, b = 0.50, a = 1.0 }
+                return { r = 1.0, g = 0.75, b = 0.50 }
             end
             
-            return { r = 1.0, g = 0.25, b = 0.15, a = 1.0 }
+            return { r = 1.0, g = 0.25, b = 0.15 }
         end,
         tickMarks = {
-            color = { r = 0.5, g = 0.5, b = 0.5, a = 1.0 },
+            color = { r = 0.5, g = 0.5, b = 0.5 },
             offsets = { 1 }
         }
     }

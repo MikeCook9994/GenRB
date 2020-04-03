@@ -22,7 +22,7 @@ PRD.configurations.shaman_restoration = {
                 cache.currentPower = (expirationTime - GetTime()) / duration
 
                 return true, cache.currentPower, count ~= 0
-            elseif event == "COMBAT_LOG_EVENT_UNFILTERED" and select(4, ...) == WeakAuras.myGUID and select(12, ...) == 53390 then  
+            elseif event == "COMBAT_LOG_EVENT_UNFILTERED" and select(4, ...) == UnitGUID("player") and select(12, ...) == 53390 then  
                 local subevent = select(2, ...)
                 if subevent == "SPELL_AURA_APPLIED" or subevent == "SPELL_AURA_APPLIED_DOSE" then
                     local count, _, duration, expirationTime = select(3, PRD:GetUnitAura("player", 53390))
@@ -59,10 +59,10 @@ PRD.configurations.shaman_restoration = {
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...)
             if cache.count > 1 then
-                return true, { r = 0.0, g = 1.0, b = 0.25, a = 1.0 }
+                return true, { r = 0.0, g = 1.0, b = 0.25 }
             end
             
-            return true, { r = 0.0, g = 1.0, b = 1.0, a = 1.0 }
+            return true, { r = 0.0, g = 1.0, b = 1.0 }
         end
     }
 }
