@@ -19,3 +19,6 @@ configurations\shaman_elemental.lua
 configurations\shaman_enhancement.lua
 configurations\shaman_restoration.lua
 configurations\warlock.lua
+configurations\priest_shadow.lua
+configurations\priest_discipline.lua
+#configurations\druid.lua

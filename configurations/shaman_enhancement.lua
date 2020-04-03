@@ -19,7 +19,14 @@ PRD.configurations.shaman_enhancement = {
                         return false
                     end,
                     color = { r = 1.0, g = 0.0, b = 0.0 }
-                }
+                },
+                spender = {
+                    resourceValue_events = { "PLAYER_TALENT_UPDATE" },
+                    resourceValue = function(cache, event, ...) 
+                        return true, select(4, GetTalentInfo(6, 2, 1)) and 30 or 20
+                    end,
+                    color = { r = 1.0, g = 0.25, b = 0.0 }
+                },
             }
         },
         text = {
@@ -84,9 +91,9 @@ PRD.configurations.shaman_enhancement = {
 
                 return false
             end,
-            xOffset = -110,
-            yOffset = 5,
-            size = 12
+            xOffset = -65,
+            yOffset = 3,
+            size = 8
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

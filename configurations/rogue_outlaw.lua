@@ -3,9 +3,6 @@ PRD.configurations.rogue_outlaw = {
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },
             offsets = { 35, 45 }
-        },
-        text = {
-            xOffset = 110
         }
     },
     top = {

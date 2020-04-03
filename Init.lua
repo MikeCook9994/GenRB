@@ -42,7 +42,7 @@ function PRD:Initialize()
 end
 
 function PRD:HandleCombatStateChangeEvent(event)
-    local alpha = (event == "PLAYER_REGEN_DISABLED") and 1.0 or 0.5 
+    local alpha = (event == "PLAYER_REGEN_DISABLED") and 1.0 or 0.25 
     for _, bar in ipairs({ PRD.container:GetChildren() }) do
         for _, child in ipairs({ bar:GetChildren() }) do
             if string.find(child:GetName(), "_prediction_bar") then

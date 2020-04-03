@@ -1,43 +1,25 @@
 PRD.configurations.shaman_elemental = {
     primary = {
         powerType = Enum.PowerType.Maelstrom,
-        tickMarks = {
-            offsets = {
-                spender = {
-                    resourceValue_events = { "PLAYER_TALENT_UPDATE" },
-                    resourceValue = function(cache, event, ...) 
-                        return true, select(4, GetTalentInfo(2, 2, 1)) and 50 or 60
-                    end,
-                    color = { r = 1.0, g = 0.6, b = 0.0 }
-                },
-                spender_2 = {
-                    enabled_events = { "PLAYER_TALENT_UPDATE" },
-                    enabled = function(cache, event, ...)
-                        return true, select(4, GetTalentInfo(2, 2, 1)) and true or false
-                    end,
-                    resourceValue = 100,
-                    color = { r = 1.0, g = 0.6, b = 0.0 }
-                },
-                cap = {
-                    resourceValue = function(cache, event, ...)
-                        if event == "INITIAL" or select(1, ...) == "player" then
-                            return true, cache.maxPower - 10
-                        end
+        color_dependencies = { "currentPower", "maxPower" },
+        color = function(cache, event, ...)
+            local r, g, b =  GetClassColor(select(2, UnitClass("player")))
+            local color = { r = r, g = g, b = b }
 
-                        return false
-                    end,
-                    color = { r = 0.6, g = 0.0, b = 0.0 }
-                },
-                surge_of_power_cap = {
-                    enabled_events = { "PLAYER_TALENT_UPDATE" },
-                    enabled = function(cache, event, ...) 
-                        return true, select(4, GetTalentInfo(6, 1, 1)) and true or false
-                    end,
-                    resourceValue = 94,
-                    color = { r = 1.0, g = 0.0, b = 0.0 }
-                }
-            }
-        },
+            if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
+                if cache.currentPower == cache.maxPower then
+                    return true, { r = 0.39, g = 0.02, b = 0.0 }
+                elseif cache.currentPower >= cache.maxPower - 10 then
+                    return true, { r = 1.0, g = 0.0, b = 0.0 }
+                elseif (cache.currentPower >= (select(4, GetTalentInfo(2, 2, 1)) and 50 or 60)) then
+                    return true, { r = 0.56, g = 0.35, b = 0.0 }
+                end
+
+                return true, color
+            end
+
+            return false
+        end,
         prediction = {
             color_dependencies = { "next" },
             color = function(cache, event, ...)
@@ -108,25 +90,43 @@ PRD.configurations.shaman_elemental = {
                 return false
             end
         },
-        color_dependencies = { "currentPower", "maxPower" },
-        color = function(cache, event, ...)
-            local r, g, b =  GetClassColor(select(2, UnitClass("player")))
-            local color = { r = r, g = g, b = b }
+        tickMarks = {
+            offsets = {
+                spender = {
+                    resourceValue_events = { "PLAYER_TALENT_UPDATE" },
+                    resourceValue = function(cache, event, ...) 
+                        return true, select(4, GetTalentInfo(2, 2, 1)) and 50 or 60
+                    end,
+                    color = { r = 1.0, g = 0.6, b = 0.0 }
+                },
+                spender_2 = {
+                    enabled_events = { "PLAYER_TALENT_UPDATE" },
+                    enabled = function(cache, event, ...)
+                        return true, select(4, GetTalentInfo(2, 2, 1)) and true or false
+                    end,
+                    resourceValue = 100,
+                    color = { r = 1.0, g = 0.6, b = 0.0 }
+                },
+                cap = {
+                    resourceValue = function(cache, event, ...)
+                        if event == "INITIAL" or select(1, ...) == "player" then
+                            return true, cache.maxPower - 10
+                        end
 
-            if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
-                if cache.currentPower == cache.maxPower then
-                    return true, { r = 0.39, g = 0.02, b = 0.0 }
-                elseif cache.currentPower >= cache.maxPower - 10 then
-                    return true, { r = 1.0, g = 0.0, b = 0.0 }
-                elseif (cache.currentPower >= (select(4, GetTalentInfo(2, 2, 1)) and 50 or 60)) then
-                    return true, { r = 0.56, g = 0.35, b = 0.0 }
-                end
-
-                return true, color
-            end
-
-            return false
-        end
+                        return false
+                    end,
+                    color = { r = 0.6, g = 0.0, b = 0.0 }
+                },
+                surge_of_power_cap = {
+                    enabled_events = { "PLAYER_TALENT_UPDATE" },
+                    enabled = function(cache, event, ...) 
+                        return true, select(4, GetTalentInfo(6, 1, 1)) and true or false
+                    end,
+                    resourceValue = 94,
+                    color = { r = 1.0, g = 0.0, b = 0.0 }
+                }
+            }
+        }
     },
     bottom = {
         powerType = Enum.PowerType.Mana,
@@ -154,8 +154,8 @@ PRD.configurations.shaman_elemental = {
             value_dependencies = { "currentPower", "maxPower" },
             value = function(cache, event, ...)
                 if event == "INITIAL" or (select(1, ...) == "player" and PRD:ConvertPowerTypeStringToEnumValue(select(2, ...)) == cache.powerType) then
-                    local healingSpellCost = GetSpellPowerCost(8004)[1].cost
-                    return true, math.floor(cache.currentPower / healingSpellCost)
+                    local castCost = GetSpellPowerCost(8004)[1].cost
+                    return true, math.floor(cache.currentPower / castCost)
                 end
 
                 return false
@@ -170,8 +170,7 @@ PRD.configurations.shaman_elemental = {
                 local percent = cache.currentPower / cache.maxPower
                 return true, { r = 1.0 * (1 - percent), g = 0.0, b = 1.0 * percent }
             end
-            
-            local r, g, b = GetClassColor(select(2, UnitClass("player")))
+
             return false
         end
     }

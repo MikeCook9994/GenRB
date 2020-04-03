@@ -141,7 +141,7 @@ function PRD:GetConfiguration()
         barConfig.texture = barConfig.texture == nil and "Interface/Addons/SharedMedia/statusbar/Cilo" or barConfig.texture
 
         -- prediction config defaults
-        if barConfig.prediction ~= nil then
+        if barConfig.prediction ~= nil and barConfig.text.enabled ~= false then
             local prediction = barConfig.prediction
             prediction.enabled = prediction.enabled == nil or prediction.enabled
             prediction.color = (prediction.color ~= nil and prediction.color) or (type(barConfig.color) == "function" and barConfig.color) or { r = barConfig.color.r, g = barConfig.color.g, b = barConfig.color.b }
@@ -152,7 +152,7 @@ function PRD:GetConfiguration()
         end
 
         -- text config defaults
-        if barConfig.text ~= nil then
+        if barConfig.text ~= nil and barConfig.text.enabled ~= false then
             local text = barConfig.text
 
             text.enabled = text.enabled == nil or text.enabled
