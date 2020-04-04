@@ -1,34 +1,38 @@
 local PRD = PRD
 
-PRD.DefaultUpdateCurrentPowerHandler = function(cache, event, unit, powerType)
-    if event == "INITIAL" or (unit == "player" and PRD:ConvertPowerTypeStringToEnumValue(powerType) == cache.powerType) then 
-        cache.currentPower = UnitPower("player", cache.powerType)
-        return true, cache.currentPower
+PRD.DefaultUpdateCurrentPowerHandler = function(cache, event, ...)
+    if event == "UNIT_POWER_FREQUENT" and select(1, ...) ~= "player" then
+        return false
     end
 
-    return false, cache.currentPower
+    cache.currentPower = UnitPower("player", cache.powerType)
+    return true, cache.currentPower
 end
 
-PRD.DefaultUpdateMaxPowerHandler = function(cache, event, unit, powerType)
-    if event == "INITIAL" or (unit == "player" and PRD:ConvertPowerTypeStringToEnumValue(powerType) == cache.powerType) then 
-        cache.maxPower = UnitPowerMax("player", cache.powerType)
-        return true, cache.maxPower
+PRD.DefaultUpdateMaxPowerHandler = function(cache, event, ...)
+    if event == "UNIT_MAXPOWER" and select(1, ...) ~= "player" then
+        return false
     end
 
-    return false, cache.maxPower
+    cache.maxPower = UnitPowerMax("player", cache.powerType)
+    return true, cache.maxPower
 end
 
-PRD.DefaultUpdateTextHandler = function(cache, event, unit, powerType)
-    if event == "INITIAL" or (unit == "player" and PRD:ConvertPowerTypeStringToEnumValue(powerType) == cache.powerType) then
-        -- if it's mana power type, format as percent by default
-        if cache.powerType == Enum.PowerType.Mana then
-            return true, (("%%.%df"):format(2):format((cache.currentPower / cache.maxPower)) * 100) .. "%"
-        end
+PRD.DefaultUpdateColorHandler = function(cache, event, ...)
+    return true, PowerBarColor[cache.powerType]
+end
 
-        return true, cache.currentPower
+PRD.DefaultUpdateTextHandler = function(cache, event, ...)
+    if (event == "UNIT_POWER_FREQUENT" or event == "UNIT_MAXPOWER") and select(1, ...) ~= "player" then
+        return false
     end
 
-    return false, cache.currentPower
+    -- if it's mana power type, format as percent by default
+    if cache.powerType == Enum.PowerType.Mana then
+        return true, (("%%.%df"):format(2):format((cache.currentPower / cache.maxPower)) * 100) .. "%"
+    end
+
+    return true, cache.currentPower
 end
 
 function PRD:NormalizeTickMarkOffsets(configs, commonColor)
@@ -127,12 +131,18 @@ function PRD:GetConfiguration()
 
         -- if power type is a function current type must be reevaluated when it updates
         -- and maxPower must be reevaluated if it's a function. But I can't imagine
-        -- a world where powerType is a function and maxPower isn't
+        -- a world where powerType is a function and maxPower isn't.
+        -- Additionally, color should be updated with the new 
         if (barConfig.powerType ~= nil and type(barConfig.powerType) == "function") then
             barConfig.currentPower_dependencies = { "powerType" }
 
             if type(barConfig.maxPower) == "function" then
                 barConfig.maxPower_dependencies = { "powerType" }
+            end
+
+            if barConfig.color == nil then
+                barConfig.color_dependencies = { "powerType" }
+                barConfig.color = PRD.DefaultUpdateColorHandler
             end
         end
         
@@ -165,7 +175,7 @@ function PRD:GetConfiguration()
             
             if text.value == nil then 
                 text.value = PRD.DefaultUpdateTextHandler
-                text.value_dependencies = { "currentPower" }
+                text.value_dependencies = { "currentPower", "maxPower" }
             end
         else 
             barConfig.text = {
@@ -176,6 +186,7 @@ function PRD:GetConfiguration()
         -- tick mark config default
         if barConfig.tickMarks ~= nil then
             local tickMarks = barConfig.tickMarks
+            tickMarks.enabled = tickMarks.enabled == nil or tickMarks.enabled
             tickMarks.texture = (tickMarks.texture ~= nil and tickMarks.texture) or "Interface/Addons/SharedMedia/statusbar/Aluminium"
             tickMarks.color = (tickMarks.color ~= nil and tickMarks.color) or { r = 1.0, g = 1.0, b = 1.0 }
 
@@ -211,7 +222,7 @@ function PRD:InitializeCache(configuration)
     return cache
 end
 
-function PRD:InitializeBarContainer(barName, parent, positionConfig)
+function PRD:InitializeBarContainer(barName, parent, positionConfig, isShown)
     local frameName = "prd_" .. barName .. "_bar_container"
     local barContainer = _G[frameName] or CreateFrame("Frame", frameName, parent)
 
@@ -219,6 +230,13 @@ function PRD:InitializeBarContainer(barName, parent, positionConfig)
     barContainer:SetWidth(positionConfig.width)
     barContainer:SetHeight(positionConfig.height)
     barContainer:SetPoint(positionConfig.anchorPoint, parent, positionConfig.anchorPoint, 0, positionConfig.yOffset)
+
+    if isShown then
+        barContainer:Show()
+    else
+        barContainer:Hide()
+    end
+
     return barContainer
 end
 
@@ -294,7 +312,7 @@ function PRD:InitializeText(barName, parent, positionConfig, font, size, flags, 
     return textContainer
 end
 
-function PRD:InitializeTickMarkContainer(barName, parent, width, height)
+function PRD:InitializeTickMarkContainer(barName, parent, width, height, isShown)
     local frameName = "prd_" .. barName .. "_tick_mark_container"
     local tickMarkContainer = _G[frameName] or CreateFrame("Frame", frameName, parent)
 
@@ -303,7 +321,13 @@ function PRD:InitializeTickMarkContainer(barName, parent, width, height)
     tickMarkContainer:SetHeight(height)
     tickMarkContainer:SetPoint("CENTER", parent, "CENTER", 0, 0)
     tickMarkContainer:SetFrameStrata("HIGH")
-    tickMarkContainer:Show()
+    
+    if isShown then
+        tickMarkContainer:Show()
+    else
+        tickMarkContainer:Hide()
+    end
+
     return tickMarkContainer
 end
 
@@ -332,12 +356,21 @@ function PRD:InitializeTickMark(barName, tickId, parent, tickWidth, texture, col
 end
 
 function PRD:InitializeProgressBar(barName, specBarConfig)
+    PRD.bars[barName] = {}
+
     local container = PRD.container
     local cache = PRD:InitializeCache(specBarConfig)
     local positionConfig = PRD.positionAndSizeConfig[barName]
-    local barContainer = PRD:InitializeBarContainer(barName, container, positionConfig)
 
-    PRD.bars[barName] = {}
+    local isShown = specBarConfig.enabled
+    if type(specBarConfig.enabled) == "function" then
+        isShown = select(2, specBarConfig.enabled(cache, "INITIAL"))
+    end
+
+    local barContainer = PRD:InitializeBarContainer(barName, container, positionConfig, isShown)
+    barContainer.cache = cache
+    PRD.bars[barName][barContainer:GetName()] = barContainer
+
 
     -- initialize status bar
     local statusBarColor = type(specBarConfig.color) == "function" and select(2, specBarConfig.color(cache, "INITIAL")) or specBarConfig.color
@@ -380,13 +413,18 @@ function PRD:InitializeProgressBar(barName, specBarConfig)
     end
 
     if specBarConfig.tickMarks.enabled ~= false then
-        local tickMarkContainer = PRD:InitializeTickMarkContainer(barName, barContainer, positionConfig.width, positionConfig.height)
+        local isShown = specBarConfig.tickMarks.enabled
+        if type(specBarConfig.tickMarks.enabled) == "function" then
+            isShown = select(2, specBarConfig.tickMarks.enabled(cache, "INITIAL"))
+        end
+
+        local tickMarkContainer = PRD:InitializeTickMarkContainer(barName, barContainer, positionConfig.width, positionConfig.height, isShown)
         tickMarkContainer.barName = barName
         tickMarkContainer.cache = cache
         PRD.bars[barName][tickMarkContainer:GetName()] = tickMarkContainer
         
         local texture = specBarConfig.tickMarks.texture
-        local tickMarks = (type(specBarConfig.tickMarks.offsets) == "function" and PRD:NormalizeTickMarkOffsets(select(2, specBarConfig.tickMarks.offsets(cache, "INITIAL")), specBarConfig.tickMarks.color)) or specBarConfig.tickMarks.offsets
+        local tickMarks = (type(specBarConfig.tickMarks.offsets) == "function" and PRD:NormalizeTickMarkOffsets(select(2, specBarConfig.tickMarks.offsets(cache, "INITIAL")) or {}, specBarConfig.tickMarks.color)) or specBarConfig.tickMarks.offsets
 
         for tickId, tickConfig in pairs(tickMarks) do
             if tickConfig.enabled ~= false then
@@ -396,7 +434,12 @@ function PRD:InitializeProgressBar(barName, specBarConfig)
                 end
 
                 local color = (tickConfig.color ~= nil and ((type(tickConfig.color) == "function" and tickConfig.color(cache, "INITIAL")) or tickConfig.color)) or ((type(specBarConfig.tickMarks.color) == "function" and specBarConfig.tickMarks.color(cache, "INITIAL")) or specBarConfig.tickMarks.color)
-                local resourceRatio = ((type(tickConfig.resourceValue) == "function" and select(2, tickConfig.resourceValue(cache, "INITIAL"))) or tickConfig.resourceValue) / cache.maxPower
+                local resourceRatio = (((type(tickConfig.resourceValue) == "function" and select(2, tickConfig.resourceValue(cache, "INITIAL"))) or tickConfig.resourceValue) / cache.maxPower)
+
+                if positionConfig.inverseFill then
+                    resourceRatio = 1 - resourceRatio
+                end
+                    
                 local tickMark = PRD:InitializeTickMark(barName, tickId, tickMarkContainer, positionConfig.tickWidth, texture, color, resourceRatio, isShown)
                 tickMark.cache = cache
                 PRD.bars[barName][tickMark:GetName()] = tickMark
@@ -444,6 +487,7 @@ function PRD:BuildEventAndDependencyConfigs(events, dependencies, frame, propert
             powerType = mainBarFrame,
             currentPower = mainBarFrame,
             maxPower = mainBarFrame,
+            enabled = PRD.bars[barName]["prd_" .. barName .. "_bar_container"],
             next = PRD.bars[barName]["prd_" .. barName .. "_prediction_bar"]
         }
     
@@ -467,27 +511,32 @@ function PRD:BuildEventAndDependencyConfigs(events, dependencies, frame, propert
 end
 
 function PRD:GatherEventAndDependencyHandlers(barName, barConfig)
-    local mainBarFrame = PRD.bars[barName]["prd_" .. barName .. "_main_bar"]
+    local mainStatusBarFrame = PRD.bars[barName]["prd_" .. barName .. "_main_bar"]
+    local mainBarContainer = PRD.bars[barName]["prd_" .. barName .. "_bar_container"]
     local predictionBarFrame = PRD.bars[barName]["prd_" .. barName .. "_prediction_bar"]
     local textContainerFrame = PRD.bars[barName]["prd_" .. barName .. "_text_container"]
     local tickMarkOffsetsFrame = PRD.bars[barName]["prd_" .. barName .. "_tick_mark_container"]
 
     -- Main
+    if type(barConfig.enabled) == "function" then
+        PRD:BuildEventAndDependencyConfigs(barConfig.enabled_events, barConfig.enabled_dependencies, mainBarContainer, 'enabled', barConfig.enabled, PRD.RefreshEnabled, barName)
+    end
+
     if type(barConfig.powerType) == "function" then
         -- power type will never have dependencies
-        PRD:BuildEventAndDependencyConfigs(barConfig.powerType_events, barConfig.powerType_dependencies, mainBarFrame, 'powerType', barConfig.powerType, PRD.RefreshPowerType, barName)
+        PRD:BuildEventAndDependencyConfigs(barConfig.powerType_events, barConfig.powerType_dependencies, mainStatusBarFrame, 'powerType', barConfig.powerType, PRD.RefreshPowerType, barName)
     end
 
     if type(barConfig.currentPower) == "function" then
-        PRD:BuildEventAndDependencyConfigs(barConfig.currentPower_events, barConfig.currentPower_dependencies, mainBarFrame, 'currentPower', barConfig.currentPower, PRD.RefreshCurrentPowerValue, barName)
+        PRD:BuildEventAndDependencyConfigs(barConfig.currentPower_events, barConfig.currentPower_dependencies, mainStatusBarFrame, 'currentPower', barConfig.currentPower, PRD.RefreshCurrentPowerValue, barName)
     end
 
     if type(barConfig.maxPower) == "function" then
-        PRD:BuildEventAndDependencyConfigs(barConfig.maxPower_events, barConfig.maxPower_dependencies, mainBarFrame, 'maxPower', barConfig.maxPower, PRD.RefreshMaxPowerValue, barName)
+        PRD:BuildEventAndDependencyConfigs(barConfig.maxPower_events, barConfig.maxPower_dependencies, mainStatusBarFrame, 'maxPower', barConfig.maxPower, PRD.RefreshMaxPowerValue, barName)
     end
 
     if type(barConfig.color) == "function" then
-        PRD:BuildEventAndDependencyConfigs(barConfig.color_events, barConfig.color_dependencies, mainBarFrame, 'mainColor', barConfig.color, PRD.RefreshBarColor, barName)
+        PRD:BuildEventAndDependencyConfigs(barConfig.color_events, barConfig.color_dependencies, mainStatusBarFrame, 'mainColor', barConfig.color, PRD.RefreshBarColor, barName)
     end
 
     -- prediction
@@ -517,6 +566,10 @@ function PRD:GatherEventAndDependencyHandlers(barName, barConfig)
     end
 
     -- generic tick mark
+    if type(barConfig.tickMarks.enabled) == "function" then
+        PRD:BuildEventAndDependencyConfigs(barConfig.tickMarks.enabled_events, barConfig.tickMarks.enabled_dependencies, tickMarkOffsetsFrame, 'tickMarksEnabled', barConfig.tickMarks.enabled, PRD.RefreshEnabled, barName)
+    end
+
     if type(barConfig.tickMarks.color) == "function" then
         PRD:BuildEventAndDependencyConfigs(barConfig.tickMarks.color_events, barConfig.tickMarks.color_dependencies, tickMarkOffsetsFrame, 'tickMarksColor', barConfig.tickMarks.color, PRD.RefreshTickMarksColor, barName)
     end
@@ -579,7 +632,7 @@ function PRD:InitializePersonalResourceDisplay()
     for progressBarName, progressBarConfig in pairs(PRD:GetConfiguration()) do
         if type(progressBarConfig.enabled) == "function" or progressBarConfig.enabled then
             PRD:InitializeProgressBar(progressBarName, progressBarConfig)
-            PRD:HandleCombatStateChangeEvent("INITAL")
+            -- PRD:HandleCombatStateChangeEvent("INITAL")
             PRD:GatherEventAndDependencyHandlers(progressBarName, progressBarConfig)
         end
     end

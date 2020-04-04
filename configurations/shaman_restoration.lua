@@ -2,37 +2,14 @@ PRD.configurations.shaman_restoration = {
     top = {
         currentPower_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
         currentPower = function(cache, event, ...)
-            if event == "FRAME_UPDATE" or event == "INITIAL" then
-                if event == "INITIAL" then
-                    cache.duration = 0
-                    cache.expirationTime = 0
-                    cache.count = 0
-                end
-
-                local name, _, count, _, duration, expirationTime = PRD:GetUnitAura("player", 53390)
-            
-                if name == nil then
-                    cache.currentPower = 0
-                    return true, 0, false
-                end
-
-                cache.duration = duration
-                cache.expirationTime = expirationTime
-                cache.count = count
-                cache.currentPower = (expirationTime - GetTime()) / duration
-
-                return true, cache.currentPower, count ~= 0
-            elseif event == "COMBAT_LOG_EVENT_UNFILTERED" and select(4, ...) == UnitGUID("player") and select(12, ...) == 53390 then  
-                local subevent = select(2, ...)
-                if subevent == "SPELL_AURA_APPLIED" or subevent == "SPELL_AURA_APPLIED_DOSE" then
-                    local count, _, duration, expirationTime = select(3, PRD:GetUnitAura("player", 53390))
-
-                    cache.duration = duration
-                    cache.expirationTime = expirationTime
-                    cache.count = count
-                    cache.currentPower = (expirationTime - GetTime()) / duration
-                    return true, cache.currentPower, true
-                elseif subevent == "SPELL_AURA_REMOVED" then
+            if event == "INITIAL" then
+                cache.duration = 0
+                cache.expirationTime = 0
+                cache.count = 0
+            elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then  
+                if (select(4, ...) ~= UnitGUID("player") or select(12, ...) ~= 53390) then
+                    return false
+                elseif select(2, ...) == "SPELL_AURA_REMOVED" then
                     cache.duration = 0
                     cache.count = 0
                     cache.expirationTime = 0
@@ -41,7 +18,19 @@ PRD.configurations.shaman_restoration = {
                 end
             end
 
-            return false
+            local name, _, count, _, duration, expirationTime = PRD:GetUnitAura("player", 53390)
+        
+            if name == nil then
+                cache.currentPower = 0
+                return true, 0, false
+            end
+
+            cache.duration = duration
+            cache.expirationTime = expirationTime
+            cache.count = count
+            cache.currentPower = (expirationTime - GetTime()) / duration
+
+            return true, cache.currentPower, count ~= 0
         end,
         maxPower = 1,
         text = {

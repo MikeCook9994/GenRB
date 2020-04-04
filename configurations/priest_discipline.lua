@@ -9,12 +9,7 @@ PRD.configurations.priest_discipline = {
                 return false
             end
 
-            PRD:DebugPrint("FRAME_UPDATE")
-            local currentCharges, _, start, duration = GetSpellCharges(194509)
-
-            cache.currentCharges = currentCharges
-            cache.start = start
-            cache.duration = duration
+            cache.currentCharges, _, cache.start, cache.duration = GetSpellCharges(194509)
 
             if event == "UNIT_SPELLCAST_SUCCEEDED" then
                 return true, cache.currentPower, true
@@ -23,7 +18,7 @@ PRD.configurations.priest_discipline = {
                 return true, 2, false
             end
 
-            cache.currentPower = currentCharges + ((GetTime() - start) / duration)
+            cache.currentPower = cache.currentCharges + ((GetTime() - cache.start) / cache.duration)
             return true, cache.currentPower, true
         end,
         maxPower = 2,

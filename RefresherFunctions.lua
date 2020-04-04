@@ -1,7 +1,8 @@
 local PRD = PRD
 
 function PRD:RefreshPowerType(eventHandler, self, event, ...)
-    return false
+    local shouldUpdate, _, frameUpdates = eventHandler(self.cache, event, ...)
+    return shouldUpdate and frameUpdates
 end
 
 function PRD:RefreshCurrentPowerValue(eventHandler, self, event, ...)
@@ -40,7 +41,7 @@ function PRD:RefreshEnabled(eventHandler, self, event, ...)
     if shouldUpdate then
         if newValue then
             self:Show()
-        else 
+        else
             self:Hide()
         end
     end
@@ -115,7 +116,7 @@ function PRD:GetExistingTickMark(name, self)
 end
 
 function PRD:RefreshTickMarkOffsets(eventHandler, self, event, ...)
-    local barPositionConfig = PRD.positionAndSizeConfig[self.barName]
+    local positionConfig = PRD.positionAndSizeConfig[self.barName]
     local barConfiguration = PRD:GetConfiguration()[self.barName]
     local shouldUpdate, newValue, frameUpdates = true, eventHandler, nil
 
@@ -128,10 +129,16 @@ function PRD:RefreshTickMarkOffsets(eventHandler, self, event, ...)
             tickMark:Hide()
         end
 
+        PRD:DebugPrint("generate new tickMarks", newValue)
+
         for index, tickConfig in pairs(PRD:NormalizeTickMarkOffsets(newValue, barConfiguration.tickMarks.color)) do
             local tickMarkName = "prd_" .. self.barName .. "_tick_mark_" .. index
             local tickMark = PRD:GetExistingTickMark(tickMarkName, self)
             local resourceRatio = ((type(tickConfig.resourceValue) == "function" and select(2, tickConfig.resourceValue(cache, "INITIAL"))) or tickConfig.resourceValue) / self.cache.maxPower
+
+            if positionConfig.inverseFill then
+                resourceRatio = 1 - resourceRatio
+            end
 
             if tickMark == nil then
                 local color = (tickConfig.color ~= nil and ((type(tickConfig.color) == "function" and tickConfig.color(cache, "INITIAL")) or tickConfig.color)) or ((type(barConfiguration.tickMarks.color) == "function" and barConfiguration.tickMarks.color(cache, "INITIAL")) or barConfiguration.tickMarks.color)
@@ -140,8 +147,8 @@ function PRD:RefreshTickMarkOffsets(eventHandler, self, event, ...)
                     isShown = select(2, tickConfig.enabled(cache, "INITIAL"))
                 end
 
-                local tickMark = PRD:InitializeTickMark(barName, tickId, tickMarkContainer, positionConfig.tickWidth, texture, color, resourceRatio, isShown)
-                PRD.bars[barName][tickMark:GetName()] = tickMark
+                local tickMark = PRD:InitializeTickMark(self.barName, index, self, positionConfig.tickWidth, barConfiguration.tickMarks.texture, color, resourceRatio, isShown)
+                PRD.bars[self.barName][tickMark:GetName()] = tickMark
             else
                 tickMark:SetPoint("LEFT", self, "LEFT", (index / self.cache.maxPower) * PRD.width, 0)
             end
