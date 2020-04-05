@@ -20,7 +20,7 @@ PRD.configurations.rogue = {
                             end
                         end
 
-                        return true, select(1, PRD:GetUnitAura("player", 195627)) ~= nil and 20 or 40
+                        return true, select(1, PRD:GetUnitBuff("player", 195627)) ~= nil and 20 or 40
                     end
                 },
                 sinister_strike = {

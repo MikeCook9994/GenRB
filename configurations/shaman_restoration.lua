@@ -18,7 +18,7 @@ PRD.configurations.shaman_restoration = {
                 end
             end
 
-            local name, _, count, _, duration, expirationTime = PRD:GetUnitAura("player", 53390)
+            local name, _, count, _, duration, expirationTime = PRD:GetUnitBuff("player", 53390)
         
             if name == nil then
                 cache.currentPower = 0

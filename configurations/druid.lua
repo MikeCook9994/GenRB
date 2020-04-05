@@ -3,19 +3,19 @@ PRD.configurations.druid = {
         powerType_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
         powerType = function(cache, event, ...)
             if event == "INITIAL" then
-                if PRD:GetUnitAura("player", 24858) ~= nil then
+                if PRD:GetUnitBuff("player", 24858) ~= nil then
                     cache.stanceId = 24858
                     cache.powerType = Enum.PowerType.LunarPower
                     return true, Enum.PowerType.LunarPower
-                elseif PRD:GetUnitAura("player", 5487) ~= nil then
+                elseif PRD:GetUnitBuff("player", 5487) ~= nil then
                     cache.stanceId = 5487
                     cache.powerType = Enum.PowerType.Rage
                     return true, Enum.PowerType.Rage
-                elseif PRD:GetUnitAura("player", 768) ~= nil then
+                elseif PRD:GetUnitBuff("player", 768) ~= nil then
                     cache.stanceId = 768
                     cache.powerType = Enum.PowerType.Energy
                     return true, Enum.PowerType.Energy
-                elseif PRD:GetUnitAura("player", 197625) ~= nil then
+                elseif PRD:GetUnitBuff("player", 197625) ~= nil then
                     cache.stanceId = 197625
                     cache.powerType = Enum.PowerType.Mana
                     return true, Enum.PowerType.Mana
@@ -169,7 +169,7 @@ PRD.configurations.druid = {
         enabled_events = { "PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED", "COMBAT_LOG_EVENT_UNFILTERED" },
         enabled = function(cache, event, ...)
             if event == "INITIAL" then
-                cache.catFormActive = PRD:GetUnitAura("player", 768) ~= nil
+                cache.catFormActive = PRD:GetUnitBuff("player", 768) ~= nil
                 cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
             elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
                 cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
@@ -211,7 +211,7 @@ PRD.configurations.druid = {
         enabled_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
         enabled = function(cache, event, ...)
             if event == "INITIAL" then
-                return true, (select(1, PRD:GetUnitAura("player", 24858)) ~= nil) or (select(1, PRD:GetUnitAura("player", 197625)) ~= nil)
+                return true, (select(1, PRD:GetUnitBuff("player", 24858)) ~= nil) or (select(1, PRD:GetUnitBuff("player", 197625)) ~= nil)
             end
 
             local spellId = select(12, ...)
@@ -255,7 +255,7 @@ PRD.configurations.druid = {
                 end
             end
 
-            local name, _, count, _, duration, expirationTime = PRD:GetUnitAura("player", 164545)
+            local name, _, count, _, duration, expirationTime = PRD:GetUnitBuff("player", 164545)
         
             if name == nil then
                 cache.currentPower = 0
@@ -274,7 +274,7 @@ PRD.configurations.druid = {
         enabled_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
         enabled = function(cache, event, ...)
             if event == "INITIAL" then
-                return true, (select(1, PRD:GetUnitAura("player", 24858)) ~= nil) or (select(1, PRD:GetUnitAura("player", 197625)) ~= nil)
+                return true, (select(1, PRD:GetUnitBuff("player", 24858)) ~= nil) or (select(1, PRD:GetUnitBuff("player", 197625)) ~= nil)
             end
 
             local spellId = select(12, ...)
@@ -318,7 +318,7 @@ PRD.configurations.druid = {
                 end
             end
 
-            local name, _, count, _, duration, expirationTime = PRD:GetUnitAura("player", 164547)
+            local name, _, count, _, duration, expirationTime = PRD:GetUnitBuff("player", 164547)
         
             if name == nil then
                 cache.currentPower = 0
@@ -339,16 +339,16 @@ PRD.configurations.druid = {
         enabled = function(cache, event, ...)
             if event == "INITIAL" then
                 cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
-                if PRD:GetUnitAura("player", 24858) ~= nil then
+                if PRD:GetUnitBuff("player", 24858) ~= nil then
                     cache.stanceId = 24858
                     return true, true
-                elseif PRD:GetUnitAura("player", 5487) ~= nil then
+                elseif PRD:GetUnitBuff("player", 5487) ~= nil then
                     cache.stanceId = 5487
                     return true, true
-                elseif PRD:GetUnitAura("player", 768) ~= nil then
+                elseif PRD:GetUnitBuff("player", 768) ~= nil then
                     cache.stanceId = 768
                     return true, true
-                elseif PRD:GetUnitAura("player", 197625) ~= nil then
+                elseif PRD:GetUnitBuff("player", 197625) ~= nil then
                     cache.stanceId = 197625
                     if cache.specializationId == 102 then
                         return true, true
@@ -432,7 +432,7 @@ PRD.configurations.druid = {
                     return true, (("%%.%df"):format(2):format((cache.currentPower / cache.maxPower)) * 100) .. "%"
                 end
 
-                if select(1, PRD:GetUnitAura("player", 69369)) ~= nil then
+                if select(1, PRD:GetUnitBuff("player", 69369)) ~= nil then
                     return true, "Free"
                 end
 

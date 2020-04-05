@@ -222,7 +222,7 @@ function PRD:InitializeCache(configuration)
     return cache
 end
 
-function PRD:InitializeBarContainer(barName, parent, positionConfig, isShown)
+function PRD:InitializeBarContainer(barName, parent, positionConfig, isShown, xOffset)
     local frameName = "prd_" .. barName .. "_bar_container"
     local barContainer = _G[frameName] or CreateFrame("Frame", frameName, parent)
 
@@ -367,7 +367,7 @@ function PRD:InitializeProgressBar(barName, specBarConfig)
         isShown = select(2, specBarConfig.enabled(cache, "INITIAL"))
     end
 
-    local barContainer = PRD:InitializeBarContainer(barName, container, positionConfig, isShown)
+    local barContainer = PRD:InitializeBarContainer(barName, container, positionConfig, isShown, 0)
     barContainer.cache = cache
     PRD.bars[barName][barContainer:GetName()] = barContainer
 
@@ -448,6 +448,97 @@ function PRD:InitializeProgressBar(barName, specBarConfig)
     end
 end
 
+function PRD:InitializeRuneProgressBar(barName, specBarConfig, runeIndex)
+    if PRD.bars[barName] == nil then 
+        PRD.bars[barName] = {}
+    end
+
+    PRD.bars[barName][runeIndex] = {}
+
+    local container = PRD.container
+    local cache = PRD:InitializeCache(specBarConfig)
+    cace.runeIndex = runeIndex
+
+    local positionConfig = PRD.positionAndSizeConfig[barName]
+
+    local isShown = specBarConfig.enabled
+    if type(specBarConfig.enabled) == "function" then
+        isShown = select(2, specBarConfig.enabled(cache, "INITIAL"))
+    end
+
+    local shiftedPositionConfig = {
+        width = positionConfig.width / 6,
+        height = positionConfig.height,
+        anchorPoint = positionConfig.anchorPoint,
+        yOffset = positionConfig.yOffset
+    }
+
+    local barContainer = PRD:InitializeBarContainer(barName, container, shiftedPositionConfig, isShown, (positionConfig.width / 6) * (runeIndex - 1))
+    barContainer.cache = cache
+    PRD.bars[barName][runeIndex][barContainer:GetName()] = barContainer
+
+
+    -- initialize status bar
+    local statusBarColor = type(specBarConfig.color) == "function" and select(2, specBarConfig.color(cache, "INITIAL")) or specBarConfig.color
+    local statusBar = PRD:InitializeStatusBar(barName .. "_main_bar", barContainer, positionConfig, "MEDIUM", specBarConfig.texture, statusBarColor, cache.currentPower / cache.maxPower, true)
+    statusBar.cache = cache
+    PRD.bars[barName][runeIndex][statusBar:GetName()] = statusBar
+
+    local backgroundBar = PRD:InitializeBackground(barName, barContainer, positionConfig)
+    PRD.bars[barName][runeIndex][backgroundBar:GetName()] = backgroundBar
+
+
+    local text = specBarConfig.text
+
+    if text.enabled ~= false then
+        local isShown = text.enabled
+        if type(text.enabled) == "function" then
+            isShown = select(2, text.enabled(cache, "INITIAL"))
+        end
+
+        local value = select(2, text.value(cache, "INITIAL"))
+        local textColor = type(text.color) == "function" and select(2, text.color(cache, "INITIAL")) or text.color
+        local textFrame = PRD:InitializeText(barName, barContainer, positionConfig, text.font, text.size, text.flags, text.xOffset, text.yOffset, value, textColor, isShown)
+        textFrame.cache = cache
+        PRD.bars[barName][runeIndex][textFrame:GetName()] = textFrame
+    end
+
+    if specBarConfig.tickMarks.enabled ~= false then
+        local isShown = specBarConfig.tickMarks.enabled
+        if type(specBarConfig.tickMarks.enabled) == "function" then
+            isShown = select(2, specBarConfig.tickMarks.enabled(cache, "INITIAL"))
+        end
+
+        local tickMarkContainer = PRD:InitializeTickMarkContainer(barName, barContainer, positionConfig.width, positionConfig.height, isShown)
+        tickMarkContainer.barName = barName
+        tickMarkContainer.cache = cache
+        PRD.bars[barName][runeIndex][tickMarkContainer:GetName()] = tickMarkContainer
+        
+        local texture = specBarConfig.tickMarks.texture
+        local tickMarks = (type(specBarConfig.tickMarks.offsets) == "function" and PRD:NormalizeTickMarkOffsets(select(2, specBarConfig.tickMarks.offsets(cache, "INITIAL")), specBarConfig.tickMarks.color)) or specBarConfig.tickMarks.offsets
+
+        for tickId, tickConfig in pairs(tickMarks) do
+            if tickConfig.enabled ~= false then
+                local isShown = tickConfig.enabled
+                if type(tickConfig.enabled) == "function" then
+                    isShown = select(2, tickConfig.enabled(cache, "INITIAL"))
+                end
+
+                local color = (tickConfig.color ~= nil and ((type(tickConfig.color) == "function" and tickConfig.color(cache, "INITIAL")) or tickConfig.color)) or ((type(specBarConfig.tickMarks.color) == "function" and specBarConfig.tickMarks.color(cache, "INITIAL")) or specBarConfig.tickMarks.color)
+                local resourceRatio = (((type(tickConfig.resourceValue) == "function" and select(2, tickConfig.resourceValue(cache, "INITIAL"))) or tickConfig.resourceValue) / cache.maxPower)
+
+                if positionConfig.inverseFill then
+                    resourceRatio = 1 - resourceRatio
+                end
+                    
+                local tickMark = PRD:InitializeTickMark(barName, tickId, tickMarkContainer, positionConfig.tickWidth, texture, color, resourceRatio, isShown)
+                tickMark.cache = cache
+                PRD.bars[barName][runeIndex][tickMark:GetName()] = tickMark
+            end
+        end
+    end
+end
+
 function PRD:BuildEventAndDependencyConfigs(events, dependencies, frame, property, eventHandler, updater, barName)
     if events ~= nil then
         frame:SetScript("OnEvent", function(self, event, ...)
@@ -510,12 +601,12 @@ function PRD:BuildEventAndDependencyConfigs(events, dependencies, frame, propert
     end 
 end
 
-function PRD:GatherEventAndDependencyHandlers(barName, barConfig)
-    local mainStatusBarFrame = PRD.bars[barName]["prd_" .. barName .. "_main_bar"]
-    local mainBarContainer = PRD.bars[barName]["prd_" .. barName .. "_bar_container"]
-    local predictionBarFrame = PRD.bars[barName]["prd_" .. barName .. "_prediction_bar"]
-    local textContainerFrame = PRD.bars[barName]["prd_" .. barName .. "_text_container"]
-    local tickMarkOffsetsFrame = PRD.bars[barName]["prd_" .. barName .. "_tick_mark_container"]
+function PRD:GatherEventAndDependencyHandlers(barName, barConfig, bar)
+    local mainStatusBarFrame = bar["prd_" .. barName .. "_main_bar"]
+    local mainBarContainer = bar["prd_" .. barName .. "_bar_container"]
+    local predictionBarFrame = bar["prd_" .. barName .. "_prediction_bar"]
+    local textContainerFrame = bar["prd_" .. barName .. "_text_container"]
+    local tickMarkOffsetsFrame = bar["prd_" .. barName .. "_tick_mark_container"]
 
     -- Main
     if type(barConfig.enabled) == "function" then
@@ -631,11 +722,18 @@ end
 function PRD:InitializePersonalResourceDisplay()
     for progressBarName, progressBarConfig in pairs(PRD:GetConfiguration()) do
         if type(progressBarConfig.enabled) == "function" or progressBarConfig.enabled then
-            PRD:InitializeProgressBar(progressBarName, progressBarConfig)
+            if progressBarConfig.powerType == Enum.PowerType.Runes then
+                for runeIndex=1,6 do
+                    PRD:InitializeRuneProgressBar(progressBarName, progressBarConfig, runeIndex)
+                    PRD:GatherEventAndDependencyHandlers(progressBarName, progressBarConfig, PRD.bars[progressBarName][runeIndex])
+                end
+            else
+                PRD:InitializeProgressBar(progressBarName, progressBarConfig)
+                PRD:GatherEventAndDependencyHandlers(progressBarName, progressBarConfig, PRD.bars[progressBarName])
+            end
+
             PRD:HandleCombatStateChangeEvent("INITAL")
-            PRD:GatherEventAndDependencyHandlers(progressBarName, progressBarConfig)
+
         end
     end
-
-    PRD:DebugPrint("bars", PRD.bars)
 end

@@ -9,7 +9,7 @@ PRD.configurations.priest_shadow = {
             local VoidFormReadyColor = { r = 1.0, g = 1.0, b = 1.0 }
 
             if event == "INITIAL" then
-                cache.voidFormActive = (select(1, PRD:GetUnitAura("player", 194249)) ~= nil)
+                cache.voidFormActive = (select(1, PRD:GetUnitBuff("player", 194249)) ~= nil)
             elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
                 if select(4, ...) == UnitGUID("player") and select(12, ...) == 194249 then
                     local subevent = select(2, ...)
@@ -38,7 +38,7 @@ PRD.configurations.priest_shadow = {
                 local VoidFormReadyColor = { r = 1.0, g = 1.0, b = 1.0 }
 
                 if event == "INITIAL" then
-                    cache.voidFormActive = (select(1, PRD:GetUnitAura("player", 194249)) ~= nil)
+                    cache.voidFormActive = (select(1, PRD:GetUnitBuff("player", 194249)) ~= nil)
                 elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
                     if select(4, ...) == UnitGUID("player") and select(12, ...) == 194249 then
                         local subevent = select(2, ...)
@@ -93,12 +93,12 @@ PRD.configurations.priest_shadow = {
                 end 
                 
                 -- memory buff
-                if PRD:GetUnitAura("player", 193223) ~= nil then
+                if PRD:GetUnitBuff("player", 193223) ~= nil then
                     cache.predictedPowerGain = cache.predictedPowerGain * 2
                 end
                 
                 -- stm buff
-                if PRD:GetUnitAura("player", 298357) ~= nil then
+                if PRD:GetUnitBuff("player", 298357) ~= nil then
                     cache.predictedPowerGain = cache.predictedPowerGain * 2
                 end
                 
@@ -118,7 +118,7 @@ PRD.configurations.priest_shadow = {
             value_dependencies = { "currentPower" },
             value = function(cache, event, ...)
                 if event == "INITIAL" then
-                    local vfname, _, vfcount, _ = PRD:GetUnitAura("player", 194249)
+                    local vfname, _, vfcount, _ = PRD:GetUnitBuff("player", 194249)
 
                     if vfname ~= nil then
                         cache.voidFormActive = true
@@ -128,7 +128,7 @@ PRD.configurations.priest_shadow = {
                         cache.voidFormStacks = 0
                     end
 
-                    local liname, _, licount, _ = PRD:GetUnitAura("player", 197937)
+                    local liname, _, licount, _ = PRD:GetUnitBuff("player", 197937)
 
                     if liname ~= nil then
                         cache.lingeringInsanityActive = true
@@ -147,7 +147,7 @@ PRD.configurations.priest_shadow = {
                                 cache.voidFormStacks = 1
                             else 
                                 cache.lingeringInsanityActive = true
-                                cache.lingeringInsanityStacks = select(3, PRD:GetUnitAura("player", 197937))
+                                cache.lingeringInsanityStacks = select(3, PRD:GetUnitBuff("player", 197937))
                             end
                         elseif subevent == "SPELL_AURA_APPLIED_DOSE" then
                             if spellId == 194249 then
