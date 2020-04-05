@@ -58,6 +58,63 @@ PRD.configurations.druid = {
             
             return false
         end,
+        text = {
+            enabled_dependencies = { "currentPower" },
+            enabled = function(cache, event, ...) 
+                return true, cache.currentPower > 0 or UnitAffectingCombat("player")
+            end
+        },
+        prediction = {
+            enabled_dependencies = { "powerType" },
+            enabled = function(cache, event, ...)
+                return true, cache.stanceId == 24858
+            end,
+            color = { 
+                r = PowerBarColor[Enum.PowerType.LunarPower].r, 
+                g = PowerBarColor[Enum.PowerType.LunarPower].g,
+                b = PowerBarColor[Enum.PowerType.LunarPower].b
+            },
+            next_events = { "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP" },
+            next_dependencies = { "currentPower" },
+            next = function(cache, event, ...)
+                if event == "INITIAL" or event == "UNIT_SPELLCAST_STOP" then
+                    cache.predictedPower = cache.currentPower
+                    cache.predictedPowerGain = 0
+                    return true, cache.currentPower
+                elseif event == "UNIT_POWER_FREQUENT" then
+                    cache.predictedPower = cache.currentPower + (cache.predictedPowerGain or 0)
+                    cache.predictedPower = math.max(cache.predictedPower, 0)
+                    cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
+                    
+                    return true, cache.predictedPower
+                elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+                    return false
+                end
+                
+                cache.predictedPowerGain = 0
+                local SpellCast = select(3, ...)
+
+                if SpellCast == 190984 then -- SW
+                    cache.predictedPowerGain = 8
+                elseif SpellCast == 194153 then -- LS
+                    cache.predictedPowerGain = 12
+                elseif SpellCast == 202347 then -- SF
+                    cache.predictedPowerGain = 8
+                elseif SpellCast == 274281 then -- New Moon
+                    cache.predictedPowerGain = 10
+                elseif SpellCast == 274282 then -- Half Moon
+                    cache.predictedPowerGain = 20
+                elseif SpellCast == 274283 then -- Full Moon
+                    cache.predictedPowerGain = 40
+                end 
+
+                cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
+                cache.predictedPower = math.max(cache.predictedPower, 0)
+                cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
+
+                return true, cache.predictedPower
+            end
+        },
         tickMarks = {
             color = { r = 1.0, g = 1.0, b = 1.0},
             offsets = { 
@@ -106,68 +163,11 @@ PRD.configurations.druid = {
                 }
             }
         },
-        prediction = {
-            enabled_dependencies = { "powerType" },
-            enabled = function(cache, event, ...)
-                return true, cache.stanceId == 24858
-            end,
-            color_dependencies = { "next" },
-            color = { 
-                r = PowerBarColor[Enum.PowerType.LunarPower].r, 
-                g = PowerBarColor[Enum.PowerType.LunarPower].g,
-                b = PowerBarColor[Enum.PowerType.LunarPower].b
-            },
-            next_events = { "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP" },
-            next_dependencies = { "currentPower" },
-            next = function(cache, event, ...)
-                if event == "INITIAL" or event == "UNIT_SPELLCAST_STOP" then
-                    cache.predictedPower = 0
-                    cache.predictedPowerGain = 0
-                    return true, 0
-                elseif event == "UNIT_POWER_FREQUENT" then
-                    cache.predictedPower = cache.currentPower + (cache.predictedPowerGain or 0)
-                    cache.predictedPower = math.max(cache.predictedPower, 0)
-                    cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
-                    
-                    return true, cache.predictedPower
-                end
-                
-                cache.predictedPowerGain = 0
-                local SpellCast = select(3, ...)
-
-                if SpellCast == 190984 then -- SW
-                    cache.predictedPowerGain = 8
-                elseif SpellCast == 194153 then -- LS
-                    cache.predictedPowerGain = 12
-                elseif SpellCast == 202347 then -- SF
-                    cache.predictedPowerGain = 8
-                elseif SpellCast == 274281 then -- New Moon
-                    cache.predictedPowerGain = 10
-                elseif SpellCast == 274282 then -- Half Moon
-                    cache.predictedPowerGain = 20
-                elseif SpellCast == 274283 then -- Full Moon
-                    cache.predictedPowerGain = 40
-                end 
-                
-                cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
-                cache.predictedPower = math.max(cache.predictedPower, 0)
-                cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
-                
-                return true, cache.predictedPower
-            end
-        },
-        text = {
-            enabled_dependencies = { "currentPower" },
-            enabled = function(cache, event, ...) 
-                return true, cache.currentPower > 0 or UnitAffectingCombat("player")
-            end
-        }
     },
     top = {
         powerType = Enum.PowerType.ComboPoints,
         enabled_events = { "PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED", "COMBAT_LOG_EVENT_UNFILTERED" },
         enabled = function(cache, event, ...)
-            -- PRD:DebugPrint("top enabled?", event)
             if event == "INITIAL" then
                 cache.catFormActive = PRD:GetUnitAura("player", 768) ~= nil
                 cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
@@ -179,16 +179,13 @@ PRD.configurations.druid = {
                 end
 
                 local spellId = select(12, ...)
-                -- PRD:DebugPrint("spellId", spellId)
-
                 if spellId == 768 then
                     local subevent = select(2, ...)
-                    -- PRD:DebugPrint("subevent", subevent)
                     if subevent == "SPELL_AURA_APPLIED" then
                         cache.catFormActive = true
                     elseif subevent == "SPELL_AURA_REMOVED" then
                         cache.catFormActive = false
-                        return false, false
+                        return true, false
                     end
                 end
             end
@@ -197,13 +194,6 @@ PRD.configurations.druid = {
             local guardianWithFeralAffinity = (cache.specializationId == 104) and select(4, GetTalentInfo(3, 2, 1))
             local restorationWithFeralAffinity = (cache.specializationId == 105) and select(4, GetTalentInfo(3, 2, 1))
             local feralSpec = cache.specializationId == 103
-
-            -- PRD:DebugPrint("cache.catFormActive", cache.catFormActive)
-            -- PRD:DebugPrint("balanceWithFeralAffinity", balanceWithFeralAffinity)
-            -- PRD:DebugPrint("guardianWithFeralAffinity", guardianWithFeralAffinity)
-            -- PRD:DebugPrint("restorationWithFeralAffinity", restorationWithFeralAffinity)
-            -- PRD:DebugPrint("feralSpec", feralSpec)
-
             return true, cache.catFormActive and (feralSpec or balanceWithFeralAffinity or guardianWithFeralAffinity or restorationWithFeralAffinity)
         end,
         color = { r = 1.0, g = 0.65, b = 0.0 },
@@ -221,12 +211,11 @@ PRD.configurations.druid = {
         enabled_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
         enabled = function(cache, event, ...)
             if event == "INITIAL" then
-                PRD:DebugPrint("boomkin form applied", (select(1, PRD:GetUnitAura("player", 24858)) ~= nil) or (select(1, PRD:GetUnitAura("player", 197625)) ~= nil))
                 return true, (select(1, PRD:GetUnitAura("player", 24858)) ~= nil) or (select(1, PRD:GetUnitAura("player", 197625)) ~= nil)
             end
 
             local spellId = select(12, ...)
-            if spellId == 24858 or spellId == 197625 then
+            if (select(4, ...) == UnitGUID("player")) and (spellId == 24858 or spellId == 197625) then
                 if select(2, ...) == "SPELL_AURA_APPLIED" then
                     return true, true
                 elseif select(2, ...) == "SPELL_AURA_REMOVED" then
@@ -285,12 +274,11 @@ PRD.configurations.druid = {
         enabled_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
         enabled = function(cache, event, ...)
             if event == "INITIAL" then
-                PRD:DebugPrint("boomkin form applied", (select(1, PRD:GetUnitAura("player", 24858)) ~= nil) or (select(1, PRD:GetUnitAura("player", 197625)) ~= nil))
                 return true, (select(1, PRD:GetUnitAura("player", 24858)) ~= nil) or (select(1, PRD:GetUnitAura("player", 197625)) ~= nil)
             end
 
             local spellId = select(12, ...)
-            if spellId == 24858 or spellId == 197625 then
+            if (select(4, ...) == UnitGUID("player")) and (spellId == 24858 or spellId == 197625) then
                 if select(2, ...) == "SPELL_AURA_APPLIED" then
                     return true, true
                 elseif select(2, ...) == "SPELL_AURA_REMOVED" then
@@ -414,7 +402,15 @@ PRD.configurations.druid = {
             offsets = function(cache, event, ...)
                 local resourceValues = { }
 
-                if select(1, GetSpecializationInfo(GetSpecialization())) == 105 then
+                if event == "UNIT_MAXPOWER" then
+                    cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
+                end
+
+                if cache.specializationId == 105 then
+                    if event == "INITIAL" then
+                        return true, resourceValues
+                    end
+
                     return false
                 end
                 
@@ -425,7 +421,7 @@ PRD.configurations.druid = {
                     currentMaxTick = currentMaxTick + healingSpellCost
                     table.insert(resourceValues, currentMaxTick)
                 end
-                
+
                 return true, resourceValues
             end
         },
@@ -434,6 +430,10 @@ PRD.configurations.druid = {
             value = function(cache, event, ...)
                 if cache.specializationId == 105 then
                     return true, (("%%.%df"):format(2):format((cache.currentPower / cache.maxPower)) * 100) .. "%"
+                end
+
+                if select(1, PRD:GetUnitAura("player", 69369)) ~= nil then
+                    return true, "Free"
                 end
 
                 local healingSpellCost = GetSpellPowerCost(8936)[1].cost

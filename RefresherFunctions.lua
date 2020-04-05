@@ -37,7 +37,6 @@ end
 
 function PRD:RefreshEnabled(eventHandler, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = eventHandler(self.cache, event, ...)
-
     if shouldUpdate then
         if newValue then
             self:Show()
@@ -129,19 +128,18 @@ function PRD:RefreshTickMarkOffsets(eventHandler, self, event, ...)
             tickMark:Hide()
         end
 
-        PRD:DebugPrint("generate new tickMarks", newValue)
-
         for index, tickConfig in pairs(PRD:NormalizeTickMarkOffsets(newValue, barConfiguration.tickMarks.color)) do
             local tickMarkName = "prd_" .. self.barName .. "_tick_mark_" .. index
             local tickMark = PRD:GetExistingTickMark(tickMarkName, self)
-            local resourceRatio = ((type(tickConfig.resourceValue) == "function" and select(2, tickConfig.resourceValue(cache, "INITIAL"))) or tickConfig.resourceValue) / self.cache.maxPower
-
-            if positionConfig.inverseFill then
-                resourceRatio = 1 - resourceRatio
-            end
 
             if tickMark == nil then
                 local color = (tickConfig.color ~= nil and ((type(tickConfig.color) == "function" and tickConfig.color(cache, "INITIAL")) or tickConfig.color)) or ((type(barConfiguration.tickMarks.color) == "function" and barConfiguration.tickMarks.color(cache, "INITIAL")) or barConfiguration.tickMarks.color)
+                
+                local resourceRatio = ((type(tickConfig.resourceValue) == "function" and select(2, tickConfig.resourceValue(cache, "INITIAL"))) or tickConfig.resourceValue) / self.cache.maxPower
+                if positionConfig.inverseFill then
+                    resourceRatio = 1 - resourceRatio
+                end
+
                 local isShown = true 
                 if type(tickConfig.enabled) == "function" then
                     isShown = select(2, tickConfig.enabled(cache, "INITIAL"))
@@ -151,6 +149,7 @@ function PRD:RefreshTickMarkOffsets(eventHandler, self, event, ...)
                 PRD.bars[self.barName][tickMark:GetName()] = tickMark
             else
                 tickMark:SetPoint("LEFT", self, "LEFT", (index / self.cache.maxPower) * PRD.width, 0)
+                tickMark:Show()
             end
 
         end

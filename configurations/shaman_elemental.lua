@@ -36,9 +36,9 @@ PRD.configurations.shaman_elemental = {
             next_dependencies = { "currentPower" },
             next = function(cache, event, ...)
                 if event == "INITIAL" or event == "UNIT_SPELLCAST_STOP" then
-                    cache.predictedPower = 0
+                    cache.predictedPower = cache.currentPower
                     cache.predictedPowerGain = 0
-                    return true, 0
+                    return true, cache.currentPower
                 elseif event == "UNIT_POWER_FREQUENT" then
                     cache.predictedPower = cache.currentPower + (cache.predictedPowerGain or 0)
                     cache.predictedPower = math.max(cache.predictedPower, 0)

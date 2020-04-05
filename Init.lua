@@ -19,8 +19,8 @@ function PRD:Initialize()
     container:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 
     -- enter/exit combat events, used to adjust bar opacity
-    -- container:RegisterEvent("PLAYER_REGEN_ENABLED")
-    -- container:RegisterEvent("PLAYER_REGEN_DISABLED")
+    container:RegisterEvent("PLAYER_REGEN_ENABLED")
+    container:RegisterEvent("PLAYER_REGEN_DISABLED")
 
     container:SetScript("OnEvent", function(self, event, ...)
         if event == "PLAYER_ENTERING_WORLD" or (event == "PLAYER_SPECIALIZATION_CHANGED" and PRD:ReinitializationNeeded()) then

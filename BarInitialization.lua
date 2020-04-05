@@ -399,7 +399,7 @@ function PRD:InitializeProgressBar(barName, specBarConfig)
 
     local predictionBar = specBarConfig.prediction
     if predictionBar.enabled ~= false then
-        local isShown = predictionBar.enabled
+        local isShown = true
         if type(predictionBar.enabled) == "function" then
             isShown = select(2, predictionBar.enabled(cache, "INITIAL"))
         end
@@ -424,7 +424,7 @@ function PRD:InitializeProgressBar(barName, specBarConfig)
         PRD.bars[barName][tickMarkContainer:GetName()] = tickMarkContainer
         
         local texture = specBarConfig.tickMarks.texture
-        local tickMarks = (type(specBarConfig.tickMarks.offsets) == "function" and PRD:NormalizeTickMarkOffsets(select(2, specBarConfig.tickMarks.offsets(cache, "INITIAL")) or {}, specBarConfig.tickMarks.color)) or specBarConfig.tickMarks.offsets
+        local tickMarks = (type(specBarConfig.tickMarks.offsets) == "function" and PRD:NormalizeTickMarkOffsets(select(2, specBarConfig.tickMarks.offsets(cache, "INITIAL")), specBarConfig.tickMarks.color)) or specBarConfig.tickMarks.offsets
 
         for tickId, tickConfig in pairs(tickMarks) do
             if tickConfig.enabled ~= false then
@@ -575,7 +575,7 @@ function PRD:GatherEventAndDependencyHandlers(barName, barConfig)
     end
 
     if type(barConfig.tickMarks.offsets) == "function" then
-        PRD:BuildEventAndDependencyConfigs(barConfig.tickMarks.offsets_events, barConfig.tickMarks.offsets_dependencies, tickMarkOffsetsFrame, 'offsets', barConfig.tickMarks.offsets, PRD.RefreshTickMarkOffsets, barName)
+        PRD:BuildEventAndDependencyConfigs(barConfig.tickMarks.offsets_events, barConfig.tickMarks.offsets_dependencies, tickMarkOffsetsFrame, 'tickMarksOffsets', barConfig.tickMarks.offsets, PRD.RefreshTickMarkOffsets, barName)
     elseif type(barConfig.tickMarks.offsets) == "table" then
         for tickId, tickConfig in pairs(barConfig.tickMarks.offsets) do
             local tickMarkFrame = PRD.bars[barName]["prd_" .. barName .. "_tick_mark_" .. tickId]
@@ -632,8 +632,10 @@ function PRD:InitializePersonalResourceDisplay()
     for progressBarName, progressBarConfig in pairs(PRD:GetConfiguration()) do
         if type(progressBarConfig.enabled) == "function" or progressBarConfig.enabled then
             PRD:InitializeProgressBar(progressBarName, progressBarConfig)
-            -- PRD:HandleCombatStateChangeEvent("INITAL")
+            PRD:HandleCombatStateChangeEvent("INITAL")
             PRD:GatherEventAndDependencyHandlers(progressBarName, progressBarConfig)
         end
     end
+
+    PRD:DebugPrint("bars", PRD.bars)
 end
