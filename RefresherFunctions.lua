@@ -2,7 +2,7 @@ local PRD = PRD
 
 function PRD:RefreshPowerType(eventHandler, self, event, ...)
     local shouldUpdate, _, frameUpdates = eventHandler(self.cache, event, ...)
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:RefreshCurrentPowerValue(eventHandler, self, event, ...)
@@ -12,7 +12,7 @@ function PRD:RefreshCurrentPowerValue(eventHandler, self, event, ...)
         self:SetValue(newValue / self.cache.maxPower)
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:RefreshMaxPowerValue(eventHandler, self, event, ...)
@@ -22,7 +22,7 @@ function PRD:RefreshMaxPowerValue(eventHandler, self, event, ...)
         self:SetValue(self.cache.currentPower / newValue)
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:RefreshText(eventHandler, self, event, ...)
@@ -32,7 +32,7 @@ function PRD:RefreshText(eventHandler, self, event, ...)
         self.text:SetText(newValue)
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:RefreshEnabled(eventHandler, self, event, ...)
@@ -45,7 +45,7 @@ function PRD:RefreshEnabled(eventHandler, self, event, ...)
         end
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:RefreshBarColor(eventHandler, self, event, ...)
@@ -55,7 +55,7 @@ function PRD:RefreshBarColor(eventHandler, self, event, ...)
         self:SetStatusBarColor(newValue.r, newValue.g, newValue.b, newValue.a or 1.0)
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:RefreshTextColor(eventHandler, self, event, ...) 
@@ -65,7 +65,7 @@ function PRD:RefreshTextColor(eventHandler, self, event, ...)
         self.text:SetTextColor(newValue.r, newValue.g, newValue.b, newValue.a or 1.0)
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:RefreshTickMarksColor(eventHandler, self, event, ...)
@@ -77,7 +77,7 @@ function PRD:RefreshTickMarksColor(eventHandler, self, event, ...)
         end
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:RefreshTickMarkColor(eventHandler, self, event, ...)
@@ -87,7 +87,7 @@ function PRD:RefreshTickMarkColor(eventHandler, self, event, ...)
         self:SetVertexColor(newValue.r, newValue.g, newValue.b, newValue.a or 1.0)
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:RefreshTickMarkXOffset(eventHandler, self, event, ...)
@@ -101,7 +101,7 @@ function PRD:RefreshTickMarkXOffset(eventHandler, self, event, ...)
         self:SetPoint("LEFT", self:GetParent(), "LEFT", (newValue / self.cache.maxPower) * PRD.width, 0)
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end
 
 function PRD:GetExistingTickMark(name, self)
@@ -155,5 +155,5 @@ function PRD:RefreshTickMarkOffsets(eventHandler, self, event, ...)
         end
     end
 
-    return shouldUpdate and frameUpdates
+    return frameUpdates
 end

@@ -1,28 +1,28 @@
 PRD.configurations.deathknight = {
     top = {
-        enabled_dependencies = { "currentPower" },
-        enabled = function(cache, event, ...)
-            return true, current ~= 0 or UnitAffectingCombat("player")
-        end,
+        -- enabled_dependencies = { "currentPower" },
+        -- enabled = function(cache, event, ...)
+        --     return true, cache.currentPower ~= 0 or UnitAffectingCombat("player")
+        -- end,
         powerType = Enum.PowerType.RunicPower,
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Darkbottom",
         text = {
             xOffset = -65,
-            yOffset = -2,
-            size = 8
+            yOffset = -3,
+            size = 7
         },
         tickMarks = {
             offsets = {
                 heart_strike = {
                     resourceValue_events = { "UNIT_AURA" },
                     resourceValue = function(cache, event, ...)
-                        if select(1, ...) ~= "player" then
+                        if event == "UNIT_AURA" and select(1, ...) ~= "player" then
                             return false
                         end
 
-                        return true, (select(1, PRD:GetUnitBuff('player', 219788)) ~= nil) and 45 or 40
+                        return true, (select(1, PRD:GetUnitBuff('player', 219788)) == nil) and 45 or 40
                     end,
-                    color = { r = 0.5, g = 0.5, b = 0.5 }
+                    color = { r = 1.0, g = 1.0, b = 1.0 }
                 },
             }
         }
@@ -31,61 +31,53 @@ PRD.configurations.deathknight = {
         powerType = Enum.PowerType.Runes,
         currentPower_events = { "RUNE_POWER_UPDATE" },
         currentPower = function(cache, event, ...) 
-            if select(1, ...) ~= cache.runeIndex then
-                return false
-            end 
-
-            local start, duration, ready = GetRuneCooldown(cache.runeIndex)
-
-            cache.elapsedCooldown = start ~= 0 and (GetTime() - start) or duration
-            cache.duration = duration
-
-            return true, cache.elapsedCooldown, not ready
-        end,
-        currentPower_events = { "RUNE_POWER_UPDATE" },
-        currentPower = function(cache, event, ...) 
-            if select(1, ...) ~= cache.runeIndex then
-                return false
+            if event == "RUNE_POWER_UPDATE" and select(1, ...) ~= cache.runeIndex then
+                return false, nil, cache.cooling
             end
 
             local start, duration, ready = GetRuneCooldown(cache.runeIndex)
 
-            cache.elapsedCooldown = start ~= 0 and (GetTime() - start) or duration
-            cache.duration = duration
+            cache.currentPower = start ~= 0 and (GetTime() - start) or duration
+            cache.cooling = not ready
 
-            return true, duration, not ready
+            return true, cache.currentPower, cache.cooling
         end,
+        maxPower_events = { "RUNE_POWER_UPDATE" },
+        maxPower = function(cache, event, ...) 
+            if event == "RUNE_POWER_UPDATE" and select(1, ...) ~= cache.runeIndex then
+                return false, nil, cache.cooling
+            end
+
+            cache.maxPower, ready = select(2, GetRuneCooldown(cache.runeIndex))
+            cache.cooling = not ready
+            return true, cache.maxPower, cache.cooling
+        end,
+        color_dependencies = { "currentPower" },
         color = function(cache, event, ...)
+            if cache.cooling then
+                return true, { r = 0.5, g = 0.125, b = 0.125 }
+            end
+
             local r, g, b = GetClassColor("DEATHKNIGHT")
-            return { r = r, g = g, b = b }
+            return true, { r = r, g = g, b = b }
         end,
         text = {
             enabled_dependencies = { "currentPower" },
             enabled = function(cache, event, ...)
-                return cache.elapsedCooldown < cache.duration and cache.duration - cache.elapsedCooldown < cache.duration
+                return true, cache.currentPower < cache.maxPower and cache.maxPower - cache.currentPower < cache.maxPower
             end,
             value_dependencies = { "currentPower" },
             value = function(cache, event, ...) 
-                return (("%%d"):format(0):format(cache.duration - cache.elapsedCooldown))
-            end
+                return true, (("%%d"):format(0):format(cache.maxPower - cache.currentPower))
+            end,
+            size = 8
         },
         tickMarks = {
-            enabled = function(cache, event, ...) 
-                return true, cache.runeIndex ~= 6
-            end,
-            offsets = function(cache, event, ...)
-                local duration = select(2, GetRuneCooldown(cache.runeIndex))
-                return { duration }
-            end,
             color = { r = 0.5, g = 0.5, b = 0.5 }
         }
     },
     bottom = {
-        enabled_dependencies = { "currentPower", "maxPower" },
-        enabled = function(cache, event, ...) 
-            return true, current ~= maxHealth or UnitAffectingCombat("player")
-        end,
-        currentPower_dependencies = { "UNIT_HEALTH_FREQUENT" },
+        currentPower_events = { "UNIT_HEALTH_FREQUENT" },
         currentPower = function(cache, event, ...) 
             if event == "UNIT_HEALTH_FREQUENT" and select(1, ...) ~= "player" then
                 return false
@@ -93,28 +85,28 @@ PRD.configurations.deathknight = {
 
             return true, UnitHealth("player") 
         end,
-        maxPower_dependencies = { "UNIT_MAXHEALTH" },
+        maxPower_events = { "UNIT_MAXHEALTH" },
         maxPower = function(cache, event, ...) 
             if event == "UNIT_MAXHEALTH" and select(1, ...) ~= "player" then
                 return false
             end
 
-            return UnitHealthMax("player") 
+            return true, UnitHealthMax("player") 
         end,
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Cloud",
         text = {
             value_dependencies = { "currentPower", "maxPower" },
             value = function(cache, event, ...)
-                return (("%%.%df"):format(2):format((currentHealth / maxHealth)) * 100) .. "%"
+                return true, (("%%.%df"):format(2):format((cache.currentPower / cache.maxPower)) * 100) .. "%"
             end,
             xOffset = 65,
-            yOffset = 3,
+            yOffset = 2,
             size = 7
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)
-            local healthRatio = currentHealth / maxHealth
-            return { r = 1.0 - (1.0 * healthRatio), g = 1.0 * healthRatio, b = 0.0}
+            local healthRatio = cache.currentPower / cache.maxPower
+            return true, { r = 1.0 - (1.0 * healthRatio), g = 1.0 * healthRatio, b = 0.0}
         end
     }
 }
