@@ -99,7 +99,7 @@ function PRD:HandleFrameUpdates()
         PRD.frameUpdates[i]=nil
     end
 
-    PRD:DebugPrint(PRD:TableCount(PRD.frameUpdates))
+    -- PRD:DebugPrint(PRD:TableCount(PRD.frameUpdates))
 end
 
 function PRD:TableCount(table)

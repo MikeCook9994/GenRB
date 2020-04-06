@@ -1,8 +1,8 @@
 PRD.configurations.druid = {
     primary = {
-        powerType_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
+        powerType_events = { "UNIT_AURA" },
         powerType = function(cache, event, ...)
-            if event == "INITIAL" then
+            if event == "INITIAL" or (event == "UNIT_AURA" and select(1, ...) == "player") then
                 if PRD:GetUnitBuff("player", 24858) ~= nil then
                     cache.stanceId = 24858
                     cache.powerType = Enum.PowerType.LunarPower
@@ -24,36 +24,6 @@ PRD.configurations.druid = {
                 cache.stanceId = nil
                 cache.powerType = Enum.PowerType.Mana
                 return true, Enum.PowerType.Mana
-            elseif select(4, ...) ~= UnitGUID("player") then
-                return false
-            end
-
-            local subevent = select(2, ...)
-            if subevent == "SPELL_AURA_APPLIED" then
-                local spellId = select(12, ...)
-                if spellId == 24858 then
-                    cache.stanceId = spellId
-                    cache.powerType = Enum.PowerType.LunarPower
-                    return true, Enum.PowerType.LunarPower
-                elseif spellId == 5487 then
-                    cache.stanceId = spellId
-                    cache.powerType = Enum.PowerType.Rage
-                    return true, Enum.PowerType.Rage
-                elseif spellId == 768 then
-                    cache.stanceId = spellId
-                    cache.powerType = Enum.PowerType.Energy
-                    return true, Enum.PowerType.Energy
-                elseif spellId == 197625 then
-                    cache.stanceId = spellId
-                    cache.powerType = Enum.PowerType.Mana
-                    return true, Enum.PowerType.Mana
-                end
-            elseif subevent == "SPELL_AURA_REMOVED" then
-                if cache.stanceId == select(12, ...) then
-                    cache.stanceId = nil
-                    cache.powerType = Enum.PowerType.Mana
-                    return true, Enum.PowerType.Mana
-                end
             end
             
             return false
@@ -77,7 +47,7 @@ PRD.configurations.druid = {
             next_events = { "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP" },
             next_dependencies = { "currentPower" },
             next = function(cache, event, ...)
-                if event == "INITIAL" or event == "UNIT_SPELLCAST_STOP" then
+                if event == "INITIAL" or (event == "UNIT_SPELLCAST_STOP" and select(1, ...) == "player") then
                     cache.predictedPower = cache.currentPower
                     cache.predictedPowerGain = 0
                     return true, cache.currentPower
@@ -87,32 +57,36 @@ PRD.configurations.druid = {
                     cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
                     
                     return true, cache.predictedPower
-                elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+                elseif event == "UNIT_AURA" then
                     return false
                 end
-                
-                cache.predictedPowerGain = 0
-                local SpellCast = select(3, ...)
 
-                if SpellCast == 190984 then -- SW
-                    cache.predictedPowerGain = 8
-                elseif SpellCast == 194153 then -- LS
-                    cache.predictedPowerGain = 12
-                elseif SpellCast == 202347 then -- SF
-                    cache.predictedPowerGain = 8
-                elseif SpellCast == 274281 then -- New Moon
-                    cache.predictedPowerGain = 10
-                elseif SpellCast == 274282 then -- Half Moon
-                    cache.predictedPowerGain = 20
-                elseif SpellCast == 274283 then -- Full Moon
-                    cache.predictedPowerGain = 40
-                end 
+                if select(1, ...) == "player" then
+                    cache.predictedPowerGain = 0
+                    local SpellCast = select(3, ...)
+    
+                    if SpellCast == 190984 then -- SW
+                        cache.predictedPowerGain = 8
+                    elseif SpellCast == 194153 then -- LS
+                        cache.predictedPowerGain = 12
+                    elseif SpellCast == 202347 then -- SF
+                        cache.predictedPowerGain = 8
+                    elseif SpellCast == 274281 then -- New Moon
+                        cache.predictedPowerGain = 10
+                    elseif SpellCast == 274282 then -- Half Moon
+                        cache.predictedPowerGain = 20
+                    elseif SpellCast == 274283 then -- Full Moon
+                        cache.predictedPowerGain = 40
+                    end 
+    
+                    cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
+                    cache.predictedPower = math.max(cache.predictedPower, 0)
+                    cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
+    
+                    return true, cache.predictedPower
+                end
 
-                cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
-                cache.predictedPower = math.max(cache.predictedPower, 0)
-                cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
-
-                return true, cache.predictedPower
+                return false
             end
         },
         tickMarks = {
@@ -166,28 +140,14 @@ PRD.configurations.druid = {
     },
     top = {
         powerType = Enum.PowerType.ComboPoints,
-        enabled_events = { "PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED", "COMBAT_LOG_EVENT_UNFILTERED" },
+        enabled_events = { "PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED", "UNIT_AURA" },
         enabled = function(cache, event, ...)
-            if event == "INITIAL" then
-                cache.catFormActive = PRD:GetUnitBuff("player", 768) ~= nil
+            if event == "PLAYER_SPECIALIZATION_CHANGED" or event == "INITIAL" then
                 cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
-            elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
-                cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
-            elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-                if select(4, ...) ~= UnitGUID("player") then
-                    return false
-                end
+            end
 
-                local spellId = select(12, ...)
-                if spellId == 768 then
-                    local subevent = select(2, ...)
-                    if subevent == "SPELL_AURA_APPLIED" then
-                        cache.catFormActive = true
-                    elseif subevent == "SPELL_AURA_REMOVED" then
-                        cache.catFormActive = false
-                        return true, false
-                    end
-                end
+            if (event == "UNIT_AURA" and select(1, ...) == "player") or event == "INITIAL" then
+                cache.catFormActive = PRD:GetUnitBuff("player", 768) ~= nil
             end
 
             local balanceWithFeralAffinity = (cache.specializationId == 102) and select(4, GetTalentInfo(3, 1, 1))
@@ -208,19 +168,10 @@ PRD.configurations.druid = {
         }
     },
     top_left = {
-        enabled_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
+        enabled_events = { "UNIT_AURA" },
         enabled = function(cache, event, ...)
-            if event == "INITIAL" then
+            if event == "INITIAL" or (event == "UNIT_AURA" and select(1, ...) == "player") then
                 return true, (select(1, PRD:GetUnitBuff("player", 24858)) ~= nil) or (select(1, PRD:GetUnitBuff("player", 197625)) ~= nil)
-            end
-
-            local spellId = select(12, ...)
-            if (select(4, ...) == UnitGUID("player")) and (spellId == 24858 or spellId == 197625) then
-                if select(2, ...) == "SPELL_AURA_APPLIED" then
-                    return true, true
-                elseif select(2, ...) == "SPELL_AURA_REMOVED" then
-                    return true, false
-                end
             end
 
             return false
@@ -244,15 +195,10 @@ PRD.configurations.druid = {
         },
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Perl",
         maxPower = 3,
-        currentPower_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
+        currentPower_events = { "UNIT_AURA" },
         currentPower = function(cache, event, ...)
-            if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-                if select(4, ...) ~= UnitGUID("player") or ((select(2, ...) == "SPELL_AURA_APPLIED" or select(2, ...) == "SPELL_AURA_APPLIED_DOSE") and (select(12, ...) ~= 164545)) then
-                    return false
-                elseif select(2, ...) == "SPELL_AURA_REMOVED" and (select(12, ...) == 164545) then
-                    cache.currentPower = 0
-                    return true, 0, false
-                end
+            if event == "UNIT_AURA" and select(1, ...) ~= "player" then
+                return false
             end
 
             local name, _, count, _, duration, expirationTime = PRD:GetUnitBuff("player", 164545)
@@ -271,19 +217,10 @@ PRD.configurations.druid = {
         },
     },
     top_right = {
-        enabled_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
+        enabled_events = { "UNIT_AURA" },
         enabled = function(cache, event, ...)
-            if event == "INITIAL" then
+            if event == "INITIAL" or (event == "UNIT_AURA" and select(1, ...) == "player") then
                 return true, (select(1, PRD:GetUnitBuff("player", 24858)) ~= nil) or (select(1, PRD:GetUnitBuff("player", 197625)) ~= nil)
-            end
-
-            local spellId = select(12, ...)
-            if (select(4, ...) == UnitGUID("player")) and (spellId == 24858 or spellId == 197625) then
-                if select(2, ...) == "SPELL_AURA_APPLIED" then
-                    return true, true
-                elseif select(2, ...) == "SPELL_AURA_REMOVED" then
-                    return true, false
-                end
             end
 
             return false
@@ -307,15 +244,10 @@ PRD.configurations.druid = {
         },
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Perl",
         maxPower = 3,
-        currentPower_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
+        currentPower_events = { "UNIT_AURA" },
         currentPower = function(cache, event, ...)
-            if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-                if select(4, ...) ~= UnitGUID("player") or ((select(2, ...) == "SPELL_AURA_APPLIED" or select(2, ...) == "SPELL_AURA_APPLIED_DOSE") and (select(12, ...) ~= 164547)) then
-                    return false
-                elseif select(2, ...) == "SPELL_AURA_REMOVED" and (select(12, ...) == 164547) then
-                    cache.currentPower = 0
-                    return true, 0, false
-                end
+            if event == "UNIT_AURA" and select(1, ...) ~= "player" then
+                return false
             end
 
             local name, _, count, _, duration, expirationTime = PRD:GetUnitBuff("player", 164547)
@@ -335,62 +267,31 @@ PRD.configurations.druid = {
     },
     bottom = {
         powerType = Enum.PowerType.Mana,
-        enabled_events = { "COMBAT_LOG_EVENT_UNFILTERED", "PLAYER_SPECIALIZATION_CHANGED" },
+        enabled_events = { "UNIT_AURA", "PLAYER_SPECIALIZATION_CHANGED" },
         enabled = function(cache, event, ...)
-            if event == "INITIAL" then
+            if event == "INITIAL" or event == "PLAYER_SPECIALIZATION_CHANGED" then 
                 cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
-                if PRD:GetUnitBuff("player", 24858) ~= nil then
-                    cache.stanceId = 24858
-                    return true, true
-                elseif PRD:GetUnitBuff("player", 5487) ~= nil then
-                    cache.stanceId = 5487
-                    return true, true
-                elseif PRD:GetUnitBuff("player", 768) ~= nil then
-                    cache.stanceId = 768
-                    return true, true
-                elseif PRD:GetUnitBuff("player", 197625) ~= nil then
-                    cache.stanceId = 197625
-                    if cache.specializationId == 102 then
-                        return true, true
-                    end
-
-                    return true, false
-                end
-
-                cache.stanceId = nil
-                return true, false
-            elseif event == "COMBAT_LOG_EVENT_UNFILTERED" and select(4, ...) ~= UnitGUID("player") then
-                return false
             end
 
-            if event == "PLAYER_SPECIALIZATION_CHANGED" then 
-                cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
-                if cache.stanceId == nil or (cache.stanceId == 197625 and cache.specializationId == 102) then
-                    return true, false
-                end
-
+            if PRD:GetUnitBuff("player", 24858) ~= nil then
+                cache.stanceId = 24858
                 return true, true
-            end
-
-            local subevent = select(2, ...)
-            if subevent == "SPELL_AURA_APPLIED" then
-                local spellId = select(12, ...)
-                if spellId == 24858 or spellId == 197625 or spellId == 768 or spellId == 5487 then
-                    cache.stanceId = spellId
-                    if spellId == 197625 and cache.specializationId ~= 102 then
-                        return true, false
-                    end
-
+            elseif PRD:GetUnitBuff("player", 5487) ~= nil then
+                cache.stanceId = 5487
+                return true, true
+            elseif PRD:GetUnitBuff("player", 768) ~= nil then
+                cache.stanceId = 768
+                return true, true
+            elseif PRD:GetUnitBuff("player", 197625) ~= nil then
+                cache.stanceId = 197625
+                if cache.specializationId == 102 then
                     return true, true
                 end
-            elseif subevent == "SPELL_AURA_REMOVED" then
-                if cache.stanceId == select(12, ...) then
-                    cache.stanceId = nil
-                    return true, false
-                end
+
+                return true, false
             end
-            
-            return false
+
+            return true, false
         end,
         tickMarks = {
             enabled_dependencies = { "enabled" },

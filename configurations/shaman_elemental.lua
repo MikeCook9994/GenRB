@@ -35,7 +35,7 @@ PRD.configurations.shaman_elemental = {
             next_events = { "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP" },
             next_dependencies = { "currentPower" },
             next = function(cache, event, ...)
-                if event == "INITIAL" or event == "UNIT_SPELLCAST_STOP" then
+                if event == "INITIAL" or (event == "UNIT_SPELLCAST_STOP" and select(1, ...) == "player") then
                     cache.predictedPower = cache.currentPower
                     cache.predictedPowerGain = 0
                     return true, cache.currentPower
@@ -47,24 +47,28 @@ PRD.configurations.shaman_elemental = {
                     return true, cache.predictedPower
                 end
 
-                cache.predictedPowerGain = 0                    
-                local SpellCast = select(3, ...)
+                if select(1, ...) == "player" then
+                    cache.predictedPowerGain = 0                    
+                    local SpellCast = select(3, ...)
+    
+                    if SpellCast == 188196 then --LB
+                        cache.predictedPowerGain = 8
+                    elseif SpellCast == 51505 then --LvB
+                        cache.predictedPowerGain = 10
+                    elseif SpellCast == 210714 then --IF
+                        cache.predictedPowerGain = 25
+                    elseif SpellCast == 188443 then --CL
+                        cache.predictedPowerGain = 12
+                    end 
+                    
+                    cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
+                    cache.predictedPower = math.max(cache.predictedPower, 0)
+                    cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
+                    
+                    return true, cache.predictedPower
+                end
 
-                if SpellCast == 188196 then --LB
-                    cache.predictedPowerGain = 8
-                elseif SpellCast == 51505 then --LvB
-                    cache.predictedPowerGain = 10
-                elseif SpellCast == 210714 then --IF
-                    cache.predictedPowerGain = 25
-                elseif SpellCast == 188443 then --CL
-                    cache.predictedPowerGain = 12
-                end 
-                
-                cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
-                cache.predictedPower = math.max(cache.predictedPower, 0)
-                cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
-                
-                return true, cache.predictedPower
+                return false
             end
         },
         text = {

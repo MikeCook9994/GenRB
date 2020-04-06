@@ -1,21 +1,13 @@
 PRD.configurations.shaman_restoration = {
     top = {
-        currentPower_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
+        currentPower_events = { "UNIT_AURA" },
         currentPower = function(cache, event, ...)
             if event == "INITIAL" then
                 cache.duration = 0
                 cache.expirationTime = 0
                 cache.count = 0
-            elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then  
-                if (select(4, ...) ~= UnitGUID("player") or select(12, ...) ~= 53390) then
-                    return false
-                elseif select(2, ...) == "SPELL_AURA_REMOVED" then
-                    cache.duration = 0
-                    cache.count = 0
-                    cache.expirationTime = 0
-                    cache.currentPower = 0
-                    return true, 0, false
-                end
+            elseif event == "UNIT_AURA" and select(1, ...) ~= "player" then  
+                return false
             end
 
             local name, _, count, _, duration, expirationTime = PRD:GetUnitBuff("player", 53390)

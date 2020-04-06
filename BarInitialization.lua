@@ -693,7 +693,14 @@ end
 function PRD:Clean()
     for barName, frames in pairs(PRD.bars) do
         for frameName, frame in pairs(frames) do
-            PRD:CleanFrameState(frame)
+            -- runes are a pain in the ass
+            if not string.find(frameName, "prd_") then
+                for runeFrameName, runeFrame in pairs(frame) do
+                    PRD:CleanFrameState(runeFrame)
+                end
+            else
+                PRD:CleanFrameState(frame)
+            end
         end
     end
 
@@ -732,7 +739,4 @@ function PRD:InitializePersonalResourceDisplay()
             PRD:HandleCombatStateChangeEvent("INITAL")
         end
     end
-
-    PRD:DebugPrint("config", config)
-    PRD:DebugPrint("bars", PRD.bars)
 end
