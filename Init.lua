@@ -56,6 +56,32 @@ function PRD:HandleCombatStateChangeEvent(event)
     end
 end
 
+function PRD:CleanFrameState(frame)
+    frame:UnregisterAllEvents()
+    frame:Hide()
+    frame:SetParent(nil)
+    frame.eventHandlers = {}
+    frame.dependencyHandlers = {}
+end
+
+function PRD:Clean()
+    for barName, frames in pairs(PRD.bars) do
+        for frameName, frame in pairs(frames) do
+            -- runes are a pain in the ass
+            if not string.find(frameName, "prd_") then
+                for runeFrameName, runeFrame in pairs(frame) do
+                    PRD:CleanFrameState(runeFrame)
+                end
+            else
+                PRD:CleanFrameState(frame)
+            end
+        end
+    end
+
+    PRD.frameUpdates = {}
+    PRD.bars = {}
+end
+
 function PRD:HandleEvent(handlerConfigs, event, ...)
     if handlerConfigs == nil then return end
 
@@ -70,7 +96,6 @@ function PRD:HandleEvent(handlerConfigs, event, ...)
         end
     end
 end
-
 
 function PRD:HandleFrameUpdates()
     local FRAME_UPDATE_EVENT = "FRAME_UPDATE"

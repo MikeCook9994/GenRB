@@ -8,7 +8,9 @@
 
 PRD.lua
 Utility.lua
+DefaultUpdaters.lua
 RefresherFunctions.lua
+ConfigurationManagement.lua
 BarInitialization.lua
 Init.lua
 
