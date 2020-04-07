@@ -486,7 +486,7 @@ function PRD:InitializePersonalResourceDisplay()
                 PRD:GatherEventAndDependencyHandlers(progressBarName, progressBarConfig)
             end
 
-            PRD:HandleCombatStateChangeEvent("INITAL")
+            PRD:HandleCombatStateChangeEvent(UnitAffectingCombat("player") and "PLAYER_REGEN_DISABLED" or "PLAYER_REGEN_ENABLED" )
         end
     end
 end

@@ -9,7 +9,7 @@ PRD.configurations.deathknight = {
         text = {
             xOffset = -65,
             yOffset = -3,
-            size = 7
+            size = 8
         },
         tickMarks = {
             offsets = {
@@ -83,7 +83,9 @@ PRD.configurations.deathknight = {
                 return false
             end
 
-            return true, UnitHealth("player") 
+            cache.currentPower = UnitHealth("player")
+
+            return true, cache.currentPower
         end,
         maxPower_events = { "UNIT_MAXHEALTH" },
         maxPower = function(cache, event, ...) 
@@ -91,22 +93,138 @@ PRD.configurations.deathknight = {
                 return false
             end
 
-            return true, UnitHealthMax("player") 
+            cache.maxPower = UnitHealthMax("player")
+
+            return true, cache.maxPower
         end,
+        prediction = {
+            next_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
+            next_dependencies = { "currentPower", "maxPower" },
+            next = function(cache, event, ...)
+                if event == "INITIAL" then
+                    cache.damageTaken = {}
+                    cache.exclude = {
+                        [223414] = true, --Parasitic Fetter
+                        [204611] = true, --Crushing Grip
+                        [204658] = true, --Crushing Grip
+                        [240448] = true, --Quaking
+                        [243237] = true, --Bursting
+                        [258837] = true, --Rent Soul
+                    }
+                elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+                    if select(8, ...) ~= UnitGUID("player") then
+                        return false
+                    end
+            
+                    local subevent = select(2, ...)
+            
+                    --set selection offset to amount for baseline SWING_DAMAGE
+                    local offset = 12
+            
+                    --handle SPELL_ABSORBED events
+                    if subevent == "SPELL_ABSORBED" then
+                        
+                        --if a spell gets absorbed instead of a melee hit, there are 3 additional parameters regarding which spell got absorbed, so move the offset 3 more places
+                        local spellid, spellname = select(offset, ...)
+                        if GetSpellInfo(spellid) == spellname then
+                            --check for excluded spellids before moving the offset
+                            if cache.exclude[spellid] then
+                                return false
+                            end
+                            offset = offset + 3
+                        end
+                        
+                        --absorb value is 7 places further
+                        offset = offset + 7
+                        table.insert(cache.damageTaken, { timestamp = GetTime(), damage = (select(offset, ...)) })
+                        
+                        --handle regular XYZ_DAMAGE events
+                    elseif subevent:find("_DAMAGE") then
+                        
+                        --don't include environmental damage (like falling etc)
+                        if not subevent:find("ENVIRONMENTAL") then
+                            
+                            --move offset by 3 places for spell info for RANGE_ and SPELL_ prefixes
+                            if subevent:find("SPELL") then
+                                --check for excluded spellids before moving the offset
+                                local spellid = select(offset, ...)
+                                if cache.exclude[spellid] then
+                                    return false
+                                end
+                                offset = offset + 3
+                            elseif subevent:find("RANGE") then
+                                offset = offset + 3
+                            end
+                            
+                            --damage event
+                            table.insert(cache.damageTaken, { timestamp = GetTime(), damage = (select(offset, ...)) })
+                        end  
+                    end
+                end
+            
+                -- clean out the table
+                PRD:DebugPrint("damage event table size", #cache.damageTaken)
+                PRD:ArrayRemove(cache.damageTaken, function(t, i)
+                    local current = GetTime()
+                    PRD:DebugPrint("event ts", t[i].timestamp)
+                    PRD:DebugPrint("current - 5", current - 5)
+                    return GetTime() <=  t[i].timestamp + 5
+                end)
+
+                local damageTaken = 0
+                for i, damageEvent in ipairs(cache.damageTaken) do
+                    damageTaken = damageTaken + damageEvent.damage
+                end
+            
+                --Versatility
+                local vers = 1 + ((GetCombatRatingBonus(29) + GetVersatilityBonus(30)) / 100)
+                
+                --Vampiric Blood
+                local vamp = PRD.GetUnitBuff("player", 55233) and 1.3 or 1
+                
+                --Guardian Spirit
+                local gs = 1 + (select(16, PRD.GetUnitBuff("player", 47788)) or 0) / 100
+                
+                --Divine Hymn
+                local dh = PRD.GetUnitBuff("player", 64844) and 1.1 or 1
+                
+                --Hemostasis
+                local haemo = 1 + 0.08 * (select(3, PRD.GetUnitBuff("player", 273947)) or 0)
+                  
+                local heal = damageTaken * 0.25 --damage taken * DS percentage
+                local perc = heal / UnitHealthMax("player") --relative to maxHP
+                perc = math.max(0.07, perc) --minimum DS percentage
+                perc = perc * vamp * vers * gs * dh * haemo --apply all multipliers
+            
+                cache.predictedHeal = perc * UnitHealthMax("player") --get the actual heal value
+                cache.predictedPower = cache.currentPower + cache.predictedHeal
+
+                return true, cache.predictedPower, #cache.damageTaken > 0
+            end,
+            color_dependencies = { "next" },
+            color = function(cache, event, ...) 
+                local healthRatio = cache.predictedPower / cache.maxPower
+                return true, { r = 0.5, g = 1.0, b = 0.5 }
+            end
+        },
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Cloud",
         text = {
-            value_dependencies = { "currentPower", "maxPower" },
+            value_dependencies = { "next", "maxPower" },
             value = function(cache, event, ...)
-                return true, (("%%.%df"):format(2):format((cache.currentPower / cache.maxPower)) * 100) .. "%"
+                if event == "INITIAL" then
+                    cache.predictedHeal = 0
+                end
+                
+                return true, string.format("%.1f%%", (cache.predictedHeal / cache.maxPower) * 100)
             end,
             xOffset = 65,
             yOffset = 2,
-            size = 7
+            size = 8
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)
             local healthRatio = cache.currentPower / cache.maxPower
-            return true, { r = 1.0 - (1.0 * healthRatio), g = 1.0 * healthRatio, b = 0.0}
+            return true, { r = 1.0 - (1.0 * healthRatio), g = 1.0 * healthRatio, b = 0.0 }
         end
     }
 }
