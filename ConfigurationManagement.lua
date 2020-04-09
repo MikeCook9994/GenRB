@@ -185,5 +185,6 @@ function PRD:GetConfiguration()
         end
     end
     
+    PRD.selectedConfig = config
     return config
 end

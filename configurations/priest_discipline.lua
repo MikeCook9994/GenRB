@@ -3,23 +3,15 @@ PRD.configurations.priest_discipline = {
         color = { r = 1.0, g = 1.0, b = 1.0 }
     },
     top = {
-        currentPower_events = { "UNIT_SPELLCAST_SUCCEEDED" },
+        currentPower_events = { "SPELL_UPDATE_CHARGES" },
         currentPower = function(cache, event, ...)
-            if event == "UNIT_SPELLCAST_SUCCEEDED" and (select(1, ...) ~= "player" or select(3, ...) ~= 194509) then
-                return false
-            end
+            local currentCharges, maxCharges, start, duration = GetSpellCharges(194509)
+            cache.currentCharges = currentCharges
+            cache.start = start
+            cache.duration = duration
+            cache.currentPower = currentCharges == maxCharges and currentCharges or currentCharges + ((GetTime() - start) / duration)
 
-            cache.currentCharges, _, cache.start, cache.duration = GetSpellCharges(194509)
-
-            if event == "UNIT_SPELLCAST_SUCCEEDED" then
-                return true, cache.currentPower, true
-            elseif cache.currentCharges == 2 then
-                cache.currentPower = 2
-                return true, 2, false
-            end
-
-            cache.currentPower = cache.currentCharges + ((GetTime() - cache.start) / cache.duration)
-            return true, cache.currentPower, true
+            return true, cache.currentPower, currentCharges ~= maxCharges
         end,
         maxPower = 2,
         text = {

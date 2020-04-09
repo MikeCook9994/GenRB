@@ -116,7 +116,14 @@ end
 
 function PRD:RefreshTickMarkOffsets(eventHandler, self, event, ...)
     local positionConfig = PRD.positionAndSizeConfig[self.barName]
-    local barConfiguration = PRD:GetConfiguration()[self.barName]
+    local barConfiguration = PRD.selectedConfig[self.barName]
+
+    -- we have a race condition with max power changing before the new config is resolved
+    if barConfiguration.tickMarks == nil then
+        PRD:DebugPrint("config", barConfiguration)
+        return false
+    end
+
     local shouldUpdate, newValue, frameUpdates = true, eventHandler, nil
 
     if type(eventHandler) == "function" then

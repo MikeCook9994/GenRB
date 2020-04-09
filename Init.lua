@@ -25,7 +25,7 @@ function PRD:Initialize()
     container:SetScript("OnEvent", function(self, event, ...)
         if event == "PLAYER_ENTERING_WORLD" or (event == "PLAYER_SPECIALIZATION_CHANGED" and PRD:ReinitializationNeeded()) then
             PRD:Clean()
-            C_Timer.After(.1, function() 
+            C_Timer.After(.1, function()
                 PRD:InitializePersonalResourceDisplay()
             end)
         elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
@@ -80,6 +80,8 @@ function PRD:Clean()
 
     PRD.frameUpdates = {}
     PRD.bars = {}
+    PRD.currentSpecKey = nil
+    PRD.selectedConfig = nil
 end
 
 function PRD:HandleEvent(handlerConfigs, event, ...)

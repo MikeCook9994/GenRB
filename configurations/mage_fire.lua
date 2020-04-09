@@ -1,35 +1,26 @@
 PRD.configurations.mage_fire = {
     primary = {
-        currentPower_events = { "UNIT_SPELLCAST_SUCCEEDED", "PLAYER_TALENT_UPDATE" },
+        currentPower_events = { "SPELL_UPDATE_CHARGES" },
         currentPower = function(cache, event, ...)
-            if event == "UNIT_SPELLCAST_SUCCEEDED" and (select(1, ...) ~= "player" or select(3, ...) ~= 108853) then
-                return false
-            end
-
             local currentCharges, maxCharges, start, duration = GetSpellCharges(108853)
             cache.start = start
             cache.duration = duration
+            cache.currentPower = currentCharges == maxCharges and currentCharges or currentCharges + ((GetTime() - start) / duration)
 
-            PRD:DebugPrint("current charges", currentCharges)
-            PRD:DebugPrint("max charges", maxCharges)
-            PRD:DebugPrint("start", start)
-            PRD:DebugPrint("duration", duration)
-
-            cache.currentPower = currentCharges == maxCharges and maxCharges or currentCharges + ((GetTime() - cache.start) / cache.duration)
-            PRD:DebugPrint("curent power", cache.currentPower)
-            return true, cache.currentPower, cache.currentPower ~= cache.maxPower
+            return true, cache.currentPower, currentCharges ~= maxCharges
         end,
-        maxPower_events = { "PLAYER_TALENT_UPDATE" },
+        maxPower_events = { "SPELL_UPDATE_CHARGES" },
         maxPower = function(cache, event , ...) 
-            return true, select(2, GetSpellCharges(108853))
+            cache.maxPower = select(2, GetSpellCharges(108853))
+            return true, cache.maxPower
         end,
         text = {
+            enabled_dependencies = { "currentPower", "maxPower" },
+            enabled = function(cache, event, ...)
+                return true, cache.currentPower ~= cache.maxPower
+            end,
             value_dependencies = { "currentPower", "maxPower" },
             value = function(cache, event, ...)
-                if cache.currentPower == cache.maxPower then
-                    return true, ""
-                end
-
                 return true, (("%%.%df"):format(0)):format((cache.duration - (GetTime() - cache.start)))
             end,
         },
@@ -48,10 +39,9 @@ PRD.configurations.mage_fire = {
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },
             offsets = function(cache, event , ...) 
-                local maxCharges = select(2, GetSpellCharges(108853))
                 local offsets = {}
 
-                for i = 1, maxCharges - 1, 1 do
+                for i = 1, cache.maxPower - 1, 1 do
                     table.insert(offsets, i)
                 end
 

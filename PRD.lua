@@ -5,6 +5,7 @@ PRD = {
     y = -102,
     container = nil,
     currentSpecKey = nil,
+    selectedConfig = nil,
     debugEnabled = true,
     frameUpdates = {},
     configurations = {},
