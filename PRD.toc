@@ -24,3 +24,6 @@ configurations\priest_shadow.lua
 configurations\priest_discipline.lua
 configurations\druid.lua
 configurations\deathknight.lua
+configurations\mage_arcane.lua
+configurations\mage_fire.lua
+configurations\mage_frost.lua

@@ -163,14 +163,11 @@ PRD.configurations.deathknight = {
                 end
             
                 -- clean out the table
-                PRD:DebugPrint("damage event table size", #cache.damageTaken)
                 PRD:ArrayRemove(cache.damageTaken, function(t, i)
                     local current = GetTime()
-                    PRD:DebugPrint("event ts", t[i].timestamp)
-                    PRD:DebugPrint("current - 5", current - 5)
                     return GetTime() <=  t[i].timestamp + 5
                 end)
-
+                
                 local damageTaken = 0
                 for i, damageEvent in ipairs(cache.damageTaken) do
                     damageTaken = damageTaken + damageEvent.damage
@@ -204,7 +201,7 @@ PRD.configurations.deathknight = {
             color_dependencies = { "next" },
             color = function(cache, event, ...) 
                 local healthRatio = cache.predictedPower / cache.maxPower
-                return true, { r = 0.5, g = 1.0, b = 0.5 }
+                return true, { r = 0.5 + (0.5 * (1.0 - healthRatio)), g = 0.5 + (0.5 * healthRatio), b = 0.5 }
             end
         },
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Cloud",
@@ -215,7 +212,7 @@ PRD.configurations.deathknight = {
                     cache.predictedHeal = 0
                 end
                 
-                return true, string.format("%.1f%%", (cache.predictedHeal / cache.maxPower) * 100)
+                return true, string.format("%.0f%%", (cache.predictedHeal / cache.maxPower) * 100)
             end,
             xOffset = 65,
             yOffset = 2,
@@ -224,7 +221,7 @@ PRD.configurations.deathknight = {
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)
             local healthRatio = cache.currentPower / cache.maxPower
-            return true, { r = 1.0 - (1.0 * healthRatio), g = 1.0 * healthRatio, b = 0.0 }
+            return true, { r = 1.0 - healthRatio, g = healthRatio, b = 0.0 }
         end
     }
 }
