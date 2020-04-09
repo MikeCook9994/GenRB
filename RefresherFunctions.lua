@@ -120,7 +120,6 @@ function PRD:RefreshTickMarkOffsets(eventHandler, self, event, ...)
 
     -- we have a race condition with max power changing before the new config is resolved
     if barConfiguration.tickMarks == nil then
-        PRD:DebugPrint("config", barConfiguration)
         return false
     end
 
