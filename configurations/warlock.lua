@@ -2,7 +2,7 @@ PRD.configurations.warlock = {
     primary = {
         currentPower_events = { "UNIT_POWER_FREQUENT" },
         currentPower = function(cache, event, ...)
-            if select(1, ...) == "player" then
+            if event == "INITIAL" or select(1, ...) == "player" then
                 cache.currentPower = UnitPower("player", Enum.PowerType.SoulShards, true) 
                 return true, cache.currentPower
             end
@@ -27,6 +27,7 @@ PRD.configurations.warlock = {
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...)
             if 267 == select(1, GetSpecializationInfo(GetSpecialization())) then
+                PRD:DebugPrint("cache", cache)
                 if cache.currentPower >= 45 then
                     return true, { r = 0.5, g = 0.0, b = 0.0 }
                 elseif cache.currentPower >= 40 then
