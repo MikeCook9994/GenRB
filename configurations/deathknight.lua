@@ -9,11 +9,19 @@ PRD.configurations.deathknight = {
         text = {
             xOffset = -65,
             yOffset = -3,
-            size = 8
+            size = 10
         },
         tickMarks = {
             offsets = {
-                heart_strike = {
+                epidemic = {
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
+                    enabled = function(cache, event, ...) 
+                        return true, (252 == select(1, GetSpecializationInfo(GetSpecialization()))) and (select(4, GetTalentInfo(6, 3, 1)) and true or false)
+                    end,
+                    resourceValue = 30,
+                    color = { r = 1.0, g = 1.0, b = 1.0 }
+                },
+                heart_strike_death_coil = {
                     resourceValue_events = { "UNIT_AURA" },
                     resourceValue = function(cache, event, ...)
                         if event == "UNIT_AURA" and select(1, ...) ~= "player" then
@@ -70,7 +78,7 @@ PRD.configurations.deathknight = {
             value = function(cache, event, ...) 
                 return true, (("%%d"):format(0):format(cache.maxPower - cache.currentPower))
             end,
-            size = 8
+            size = 10
         },
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 }
