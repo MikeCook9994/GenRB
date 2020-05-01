@@ -32,6 +32,14 @@ PRD.configurations.deathknight = {
                     end,
                     color = { r = 1.0, g = 1.0, b = 1.0 }
                 },
+                bonestorm = {
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
+                    enabled = function(cache, event, ...) 
+                        return true, (250 == select(1, GetSpecializationInfo(GetSpecialization()))) and (select(4, GetTalentInfo(7, 3, 1)) and true or false)
+                    end,    
+                    resourceValue = 100,
+                    color = { r = 1.0, g = 1.0, b = 1.0 }
+                }
             }
         }
     },
