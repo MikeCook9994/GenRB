@@ -21,7 +21,7 @@ PRD.configurations.priest_discipline = {
                 local cooldown = cache.currentCharges == 2 and "" or (("%%.%df"):format(0)):format((cache.duration - (GetTime() - cache.start)))
                 return true, currentCharges .. " " .. cooldown
             end,
-            size = 8,
+            size = 10,
             xOffset = -65,
             yOffset = -3
         },

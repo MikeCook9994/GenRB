@@ -118,11 +118,15 @@ PRD.configurations.shaman_elemental = {
             offsets = function(cache, event, ...)
                 local resourceValues = {}
                 
-                local healingSpellCost = GetSpellPowerCost(8004)[1].cost
+                local spellCost = GetSpellPowerCost(8004)[1].cost
+                if (spellCost == 0) then
+                    return true, resourceValues
+                end
+                
                 local currentMaxTick = 0
                 
-                while currentMaxTick + healingSpellCost < cache.maxPower do
-                    currentMaxTick = currentMaxTick + healingSpellCost
+                while currentMaxTick + spellCost < cache.maxPower do
+                    currentMaxTick = currentMaxTick + spellCost
                     table.insert(resourceValues, currentMaxTick)
                 end
                 
@@ -132,8 +136,12 @@ PRD.configurations.shaman_elemental = {
         text = {
             value_dependencies = { "currentPower", "maxPower" },
             value = function(cache, event, ...)
-                local castCost = GetSpellPowerCost(8004)[1].cost
-                return true, math.floor(cache.currentPower / castCost)
+                local spellCost = GetSpellPowerCost(8004)[1].cost
+                if (spellCost == 0) then
+                    return true, ""
+                end
+
+                return true, math.floor(cache.currentPower / spellCost)
             end,
             xOffset = -65,
             yOffset = 3,

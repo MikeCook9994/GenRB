@@ -155,11 +155,15 @@ PRD.configurations.priest_shadow = {
             offsets = function(cache, event, ...)
                 local resourceValues = { }
 
-                local castCost = GetSpellPowerCost(186263)[1].cost
+                local spellCost = GetSpellPowerCost(186263)[1].cost
+                if (spellCost == 0) then
+                    return true, resourceValues
+                end
+                
                 local currentMaxTick = 0
                 
-                while currentMaxTick + castCost < cache.maxPower do
-                    currentMaxTick = currentMaxTick + castCost
+                while currentMaxTick + spellCost < cache.maxPower do
+                    currentMaxTick = currentMaxTick + spellCost
                     table.insert(resourceValues, currentMaxTick)
                 end
                 
@@ -169,12 +173,15 @@ PRD.configurations.priest_shadow = {
         text = {
             value_dependencies = { "currentPower", "maxPower" },
             value = function(cache, event, ...)
-                local castCost = GetSpellPowerCost(186263)[1].cost
-                return true, math.floor(cache.currentPower / castCost)
+                local spellCost = GetSpellPowerCost(186263)[1].cost
+                if (spellCost == 0) then
+                    return true, ""
+                end
+                return true, math.floor(cache.currentPower / spellCost)
             end,
             xOffset = -65,
             yOffset = 3,
-            size = 8
+            size = 10
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

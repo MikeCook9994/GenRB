@@ -232,7 +232,7 @@ PRD.configurations.deathknight = {
             end,
             xOffset = 65,
             yOffset = 2,
-            size = 8
+            size = 10
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

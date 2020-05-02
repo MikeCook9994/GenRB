@@ -54,11 +54,15 @@ PRD.configurations.shaman_enhancement = {
             offsets = function(cache, event, ...)
                 local resourceValues = {}
                 
-                local healingSpellCost = GetSpellPowerCost(188070)[1].cost
+                local spellCost = GetSpellPowerCost(188070)[1].cost
+                if (spellCost == 0) then
+                    return true, resourceValues
+                end
+                
                 local currentMaxTick = 0
                 
-                while currentMaxTick + healingSpellCost < cache.maxPower do
-                    currentMaxTick = currentMaxTick + healingSpellCost
+                while currentMaxTick + spellCost < cache.maxPower do
+                    currentMaxTick = currentMaxTick + spellCost
                     table.insert(resourceValues, currentMaxTick)
                 end
                 
@@ -68,12 +72,16 @@ PRD.configurations.shaman_enhancement = {
         text = {
             value_dependencies = { "currentPower", "maxPower" },
             value = function(cache, event, ...)
-                local healingSpellCost = GetSpellPowerCost(188070)[1].cost
-                return true, math.floor(cache.currentPower / healingSpellCost)
+                local spellCost = GetSpellPowerCost(188070)[1].cost
+                if (spellCost == 0) then
+                    return true, ""
+                end
+
+                return true, math.floor(cache.currentPower / spellCost)
             end,
             xOffset = -65,
             yOffset = 3,
-            size = 8
+            size = 10
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

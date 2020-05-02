@@ -315,11 +315,15 @@ PRD.configurations.druid = {
                     return false
                 end
                 
-                local healingSpellCost = GetSpellPowerCost(8936)[1].cost
+                local spellCost = GetSpellPowerCost(8936)[1].cost
+                if (spellCost == 0) then
+                    return true, resourceValues
+                end
+
                 local currentMaxTick = 0
                 
-                while currentMaxTick + healingSpellCost <= cache.maxPower do
-                    currentMaxTick = currentMaxTick + healingSpellCost
+                while currentMaxTick + spellCost <= cache.maxPower do
+                    currentMaxTick = currentMaxTick + spellCost
                     table.insert(resourceValues, currentMaxTick)
                 end
 
@@ -337,8 +341,12 @@ PRD.configurations.druid = {
                     return true, "Free"
                 end
 
-                local healingSpellCost = GetSpellPowerCost(8936)[1].cost
-                return true, math.floor(cache.currentPower / healingSpellCost)
+                local spellCost = GetSpellPowerCost(8936)[1].cost
+                if (spellCost == 0) then
+                    return true, ""
+                end
+
+                return true, math.floor(cache.currentPower / spellCost)
             end,
             xOffset = -65,
             yOffset = 3,

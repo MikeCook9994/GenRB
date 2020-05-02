@@ -35,7 +35,7 @@ PRD.configurations.shaman_restoration = {
                 local buffDuration = cache.duration == 0 and "" or (("%%.%df"):format(0)):format((cache.expirationTime - GetTime()))
                 return true, currentStacks .. " " .. buffDuration
             end,
-            size = 8,
+            size = 10,
             xOffset = -65,
             yOffset = -3
         },
