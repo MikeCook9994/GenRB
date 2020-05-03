@@ -86,7 +86,7 @@ PRD.configurations.deathknight = {
             value = function(cache, event, ...) 
                 return true, (("%%d"):format(0):format(cache.maxPower - cache.currentPower))
             end,
-            size = 10
+            size = 8
         },
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 }

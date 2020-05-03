@@ -27,3 +27,4 @@ configurations\deathknight.lua
 configurations\mage_arcane.lua
 configurations\mage_fire.lua
 configurations\mage_frost.lua
+configurations\warrior.lua
