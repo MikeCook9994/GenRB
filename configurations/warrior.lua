@@ -41,7 +41,7 @@ PRD.configurations.warrior = {
         end,
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Cloud",
         text = {
-            value_dependencies = { "maxPower" },
+            value_dependencies = { "currentPower", "maxPower" },
             value = function(cache, event, ...)
                 return true, string.format("%.0f%%", (cache.currentPower / cache.maxPower) * 100)
             end,
