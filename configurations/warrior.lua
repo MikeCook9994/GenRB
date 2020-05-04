@@ -8,6 +8,27 @@ PRD.configurations.warrior = {
                         return true, select(1, GetSpecializationInfo(GetSpecialization())) == 72
                     end,
                     resourceValue = 85
+                },
+                arms_slam = {
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED" },
+                    enabled = function(cache, event, ...)
+                        return true, select(1, GetSpecializationInfo(GetSpecialization())) == 71
+                    end,
+                    resourceValue = 20
+                },
+                arms_mortal_strike = {
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED" },
+                    enabled = function(cache, event, ...)
+                        return true, select(1, GetSpecializationInfo(GetSpecialization())) == 71
+                    end,
+                    resourceValue = 30
+                },
+                arms_execute = {
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED" },
+                    enabled = function(cache, event, ...)
+                        return true, select(1, GetSpecializationInfo(GetSpecialization())) == 71
+                    end,
+                    resourceValue = 40
                 }
             }
         },
