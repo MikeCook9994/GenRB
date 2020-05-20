@@ -53,7 +53,7 @@ PRD.configurations.deathknight = {
 
             local start, duration, ready = GetRuneCooldown(cache.runeIndex)
 
-            cache.currentPower = start ~= 0 and (GetTime() - start) or duration
+            cache.currentPower = ((start ~= 0 and start ~= nil) and (GetTime() - start)) or duration
             cache.cooling = not ready
 
             return true, cache.currentPower, cache.cooling
@@ -227,8 +227,7 @@ PRD.configurations.deathknight = {
                 if event == "INITIAL" then
                     cache.predictedHeal = 0
                 end
-                
-                return true, string.format("%.0f%%", (cache.predictedHeal / cache.maxPower) * 100)
+                return true, string.format("%.1f%%", (cache.predictedHeal / cache.maxPower) * 100)
             end,
             xOffset = 65,
             yOffset = 2,
