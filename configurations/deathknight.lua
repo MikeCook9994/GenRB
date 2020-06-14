@@ -13,22 +13,48 @@ PRD.configurations.deathknight = {
         },
         tickMarks = {
             offsets = {
-                epidemic = {
+                frost_strike = {
+                    resourceValue = 25,
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED" },
+                    enabled = function(cache, event, ...)
+                        if event == "UNIT_AURA" and select(1, ...) ~= "player" then
+                            return false
+                        end
+
+                        return true, 251 == select(1, GetSpecializationInfo(GetSpecialization()))
+                    end,
+                    color = { r = 1.0, g = 1.0, b = 1.0 }
+                },
+                glacial_advance_epidemic = {
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
                     enabled = function(cache, event, ...) 
-                        return true, (252 == select(1, GetSpecializationInfo(GetSpecialization()))) and (select(4, GetTalentInfo(6, 3, 1)) and true or false)
+                        local glacialAdvanceTalented = (251 == select(1, GetSpecializationInfo(GetSpecialization()))) and (select(4, GetTalentInfo(6, 2, 1)) and true or false)
+                        local epicdemicTalented = (252 == select(1, GetSpecializationInfo(GetSpecialization()))) and (select(4, GetTalentInfo(6, 3, 1)) and false or false)
+                        return true, glacialAdvanceTalented or epicdemicTalented
                     end,
                     resourceValue = 30,
                     color = { r = 1.0, g = 1.0, b = 1.0 }
                 },
-                heart_strike_death_coil = {
+                death_coil = {
+                    resourceValue = 40,
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED" },
+                    enabled = function(cache, event, ...)
+                        if event == "UNIT_AURA" and select(1, ...) ~= "player" then
+                            return false
+                        end
+
+                        return true, 252 == select(1, GetSpecializationInfo(GetSpecialization()))
+                    end,
+                    color = { r = 1.0, g = 1.0, b = 1.0 }
+                },
+                death_strike = {
                     resourceValue_events = { "UNIT_AURA" },
                     resourceValue = function(cache, event, ...)
                         if event == "UNIT_AURA" and select(1, ...) ~= "player" then
                             return false
                         end
 
-                        return true, (select(1, PRD:GetUnitBuff('player', 219788)) == nil) and 45 or 40
+                        return true, (250 ~= select(1, GetSpecializationInfo(GetSpecialization())) and 35) or select(1, PRD:GetUnitBuff('player', 219788)) == nil and 45 or 40
                     end,
                     color = { r = 1.0, g = 1.0, b = 1.0 }
                 },
