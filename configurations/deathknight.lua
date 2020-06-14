@@ -53,7 +53,7 @@ PRD.configurations.deathknight = {
 
             local start, duration, ready = GetRuneCooldown(cache.runeIndex)
 
-            cache.currentPower = ((start ~= 0 and start ~= nil) and (GetTime() - start)) or duration
+            cache.currentPower = ((start ~= 0 and start ~= nil) and (GetTime() - start)) or duration or 0
             cache.cooling = not ready
 
             return true, cache.currentPower, cache.cooling
@@ -66,6 +66,11 @@ PRD.configurations.deathknight = {
 
             cache.maxPower, ready = select(2, GetRuneCooldown(cache.runeIndex))
             cache.cooling = not ready
+
+            if cache.maxPower == nil then
+                return false, nil
+            end
+
             return true, cache.maxPower, cache.cooling
         end,
         color_dependencies = { "currentPower" },
@@ -111,10 +116,14 @@ PRD.configurations.deathknight = {
 
             cache.maxPower = UnitHealthMax("player")
 
+            if cache.maxPower == nil then
+                return false
+            end
+
             return true, cache.maxPower
         end,
         prediction = {
-            next_events = { "COMBAT_LOG_EVENT_UNFILTERED" },
+            next_events = { "COMBAT_LOG_EVENT_UNFILTERED", "PLAYER_SPECIALIZATION_CHANGED" },
             next_dependencies = { "currentPower", "maxPower" },
             next = function(cache, event, ...)
                 if event == "INITIAL" then
@@ -177,6 +186,10 @@ PRD.configurations.deathknight = {
                         end  
                     end
                 end
+
+                local specId = select(1, GetSpecializationInfo(GetSpecialization()))
+                local minimumPercent = (specId == 250 and 0.07) or 0.1
+                local damagePercent = (specId == 250 and 0.25) or (specId == 251 and 0.6) or (specId == 252 and 0.4) or .25
             
                 -- clean out the table
                 PRD:ArrayRemove(cache.damageTaken, function(t, i)
@@ -194,6 +207,9 @@ PRD.configurations.deathknight = {
                 
                 --Vampiric Blood
                 local vamp = PRD.GetUnitBuff("player", 55233) and 1.3 or 1
+
+                -- Unholy Dark Succor
+                local darkSuccor = PRD.GetUnitBuff("player", 178819) and 10 or 0
                 
                 --Guardian Spirit
                 local gs = 1 + (select(16, PRD.GetUnitBuff("player", 47788)) or 0) / 100
@@ -204,11 +220,12 @@ PRD.configurations.deathknight = {
                 --Hemostasis
                 local haemo = 1 + 0.08 * (select(3, PRD.GetUnitBuff("player", 273947)) or 0)
                   
-                local heal = damageTaken * 0.25 --damage taken * DS percentage
+                local heal = damageTaken * damagePercent --damage taken * DS percentage
                 local perc = heal / UnitHealthMax("player") --relative to maxHP
-                perc = math.max(0.07, perc) --minimum DS percentage
+                perc = math.max(minimumPercent, perc) --minimum DS percentage
                 perc = perc * vamp * vers * gs * dh * haemo --apply all multipliers
-            
+                perc = perc + darkSuccor -- apply unholy dk dark succor if present
+
                 cache.predictedHeal = perc * UnitHealthMax("player") --get the actual heal value
                 cache.predictedPower = cache.currentPower + cache.predictedHeal
 
@@ -224,9 +241,6 @@ PRD.configurations.deathknight = {
         text = {
             value_dependencies = { "next", "maxPower" },
             value = function(cache, event, ...)
-                if event == "INITIAL" then
-                    cache.predictedHeal = 0
-                end
                 return true, string.format("%.1f%%", (cache.predictedHeal / cache.maxPower) * 100)
             end,
             xOffset = 65,

@@ -176,6 +176,20 @@ function PRD:InitializeProgressBar(barName, specBarConfig)
     local backgroundBar = PRD:InitializeBackground(barName, barContainer, positionConfig)
     PRD.bars[barName][backgroundBar:GetName()] = backgroundBar
 
+    local predictionBar = specBarConfig.prediction
+    if predictionBar.enabled ~= false then
+        local isShown = true
+        if type(predictionBar.enabled) == "function" then
+            isShown = select(2, predictionBar.enabled(cache, "INITIAL"))
+        end
+
+        local predictionBarResourceRatio = select(2, predictionBar.next(cache, "INITIAL")) / cache.maxPower
+        local predictionBarColor = type(predictionBar.color) == "function" and select(2, predictionBar.color(cache, "INITIAL")) or predictionBar.color
+        local predictionBar = PRD:InitializeStatusBar(barName .. "_prediction_bar", barContainer, positionConfig, "LOW", specBarConfig.texture, predictionBarColor, predictionBarResourceRatio, isShown)
+        predictionBar:SetAlpha(0.75)
+        predictionBar.cache = cache
+        PRD.bars[barName][predictionBar:GetName()] = predictionBar
+    end
 
     local text = specBarConfig.text
 
@@ -190,21 +204,6 @@ function PRD:InitializeProgressBar(barName, specBarConfig)
         local textFrame = PRD:InitializeText(barName, barContainer, positionConfig, text.font, text.size, text.flags, text.xOffset, text.yOffset, value, textColor, isShown)
         textFrame.cache = cache
         PRD.bars[barName][textFrame:GetName()] = textFrame
-    end
-
-    local predictionBar = specBarConfig.prediction
-    if predictionBar.enabled ~= false then
-        local isShown = true
-        if type(predictionBar.enabled) == "function" then
-            isShown = select(2, predictionBar.enabled(cache, "INITIAL"))
-        end
-
-        local predictionBarResourceRatio = select(2, predictionBar.next(cache, "INITIAL")) / cache.maxPower
-        local predictionBarColor = type(predictionBar.color) == "function" and select(2, predictionBar.color(cache, "INITIAL")) or predictionBar.color
-        local predictionBar = PRD:InitializeStatusBar(barName .. "_prediction_bar", barContainer, positionConfig, "LOW", specBarConfig.texture, predictionBarColor, predictionBarResourceRatio, isShown)
-        predictionBar:SetAlpha(0.75)
-        predictionBar.cache = cache
-        PRD.bars[barName][predictionBar:GetName()] = predictionBar
     end
 
     if specBarConfig.tickMarks.enabled ~= false then
