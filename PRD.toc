@@ -12,6 +12,7 @@ DefaultUpdaters.lua
 RefresherFunctions.lua
 ConfigurationManagement.lua
 BarInitialization.lua
+SlashCommands.lua
 Init.lua
 
 # configurations
