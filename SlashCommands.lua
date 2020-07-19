@@ -7,6 +7,12 @@ function SlashCmdList.PERSONALRESOURCEDISPLAY(msg, editBox)
             PRD:InitializePersonalResourceDisplay()
         end)
         print('Reloading PRD')
+    elseif msg == "hide" then
+        print("Hiding PRD")
+        _G["prd_bar_container"]:Hide()
+    elseif msg == "show" then
+        print("Show PRD")
+        _G["prd_bar_container"]:Show()
     else
         print('No command provided')
         print('Currently supported Commands:')

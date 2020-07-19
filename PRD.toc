@@ -30,3 +30,4 @@ configurations\mage_fire.lua
 configurations\mage_frost.lua
 configurations\warrior.lua
 configurations\paladin_retribution.lua
+configurations\paladin_protection.lua
