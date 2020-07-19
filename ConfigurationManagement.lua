@@ -69,7 +69,7 @@ function PRD:GetConfiguration()
         maxPower = PRD.DefaultUpdateMaxPowerHandler,
         text = defaultTextConfig,
         color = { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b },
-        texture = "Interface/Addons/SharedMedia/statusbar/Cilo",
+        texture = "Interface\\Addons\\SharedMedia\\statusbar\\Cilo",
         prediction = {
             enabled = false,
         },
@@ -127,7 +127,7 @@ function PRD:GetConfiguration()
         
         barConfig.enabled = barConfig.enabled == nil or barConfig.enabled
         barConfig.color = barConfig.color == nil and { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } or barConfig.color
-        barConfig.texture = barConfig.texture == nil and "Interface/Addons/SharedMedia/statusbar/Cilo" or barConfig.texture
+        barConfig.texture = barConfig.texture == nil and "Interface\\Addons\\SharedMedia\\statusbar\\Cilo" or barConfig.texture
 
         -- prediction config defaults
         if barConfig.prediction ~= nil and barConfig.text.enabled ~= false then
@@ -146,7 +146,7 @@ function PRD:GetConfiguration()
 
             text.enabled = text.enabled == nil or text.enabled
             text.color = (text.color ~= nil and text.color) or { r = 1.0, g = 1.0, b = 1.0 }
-            text.font = (text.font ~= nil and text.font) or "Interface/Addons/Details/fonts/Accidental Presidency.ttf"
+            text.font = (text.font ~= nil and text.font) or "Interface\\Addons\\Details\\fonts\\Accidental Presidency.ttf"
             text.size = (text.size ~= nil and text.size) or 14
             text.flags = (text.flags ~= nil and text.flags) or "OUTLINE"
             text.xOffset = (text.xOffset ~= nil and text.xOffset) or 0
@@ -166,7 +166,7 @@ function PRD:GetConfiguration()
         if barConfig.tickMarks ~= nil then
             local tickMarks = barConfig.tickMarks
             tickMarks.enabled = tickMarks.enabled == nil or tickMarks.enabled
-            tickMarks.texture = (tickMarks.texture ~= nil and tickMarks.texture) or "Interface/Addons/SharedMedia/statusbar/Aluminium"
+            tickMarks.texture = (tickMarks.texture ~= nil and tickMarks.texture) or "Interface\\Addons\\SharedMedia\\statusbar\\Aluminium"
             tickMarks.color = (tickMarks.color ~= nil and tickMarks.color) or { r = 1.0, g = 1.0, b = 1.0 }
 
             if type(tickMarks.offsets) == "function" then
