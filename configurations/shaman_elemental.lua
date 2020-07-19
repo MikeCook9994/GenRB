@@ -72,7 +72,7 @@ PRD.configurations.shaman_elemental = {
     top = {
         color = function(cache, event, ...)
             local r, g, b =  GetClassColor(select(2, UnitClass("player")))
-            return true, { r = r, g = g, b = b }
+            return true, { r = 0.75, g = 0.4, b = 0.2 }
         end,
         currentPower_events = { "UNIT_AURA" },
         currentPower = function(cache, event, ...)
@@ -110,7 +110,7 @@ PRD.configurations.shaman_elemental = {
                     cache.predictedPowerGain = 0                    
                     local SpellCast = select(3, ...)
     
-                    if SpellCast == 188196 then --LB
+                    if SpellCast == 188443 then --LB
                         cache.predictedPowerGain = 1
                     end
                     
