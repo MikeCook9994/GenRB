@@ -1,37 +1,30 @@
 PRD.configurations.shaman_elemental = {
     primary = {
-        powerType = Enum.PowerType.Maelstrom,
-        color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)
             local r, g, b =  GetClassColor(select(2, UnitClass("player")))
-            local color = { r = r, g = g, b = b }
-
-            if cache.currentPower == cache.maxPower then
-                color = { r = 0.39, g = 0.02, b = 0.0 }
-            elseif cache.currentPower >= cache.maxPower - 10 then
-                color = { r = 1.0, g = 0.0, b = 0.0 }
-            elseif (cache.currentPower >= (select(4, GetTalentInfo(2, 2, 1)) and 50 or 60)) then
-                color = { r = 0.56, g = 0.35, b = 0.0 }
+            return true, { r = r, g = g, b = b }
+        end,
+        currentPower_events = { "UNIT_AURA" },
+        currentPower = function(cache, event, ...)
+            if event == "INITIAL" then
+                cache.currentPower = 0
+            elseif event == "UNIT_AURA" and select(1, ...) ~= "player" then  
+                return false
             end
 
-            return true, color
+            local name, _, count, _ = PRD:GetUnitBuff("player", 260111)
+        
+            if name == nil then
+                cache.currentPower = 0
+                return true, 0, false
+            end
+
+            cache.currentPower = count
+
+            return true, cache.currentPower, count ~= 0
         end,
+        maxPower = 8,
         prediction = {
-            color_dependencies = { "next" },
-            color = function(cache, event, ...)
-                local r, g, b =  GetClassColor(select(2, UnitClass("player")))
-                local color = { r = r, g = g, b = b }
-
-                if cache.predictedPower == cache.maxPower then
-                    color = { r = 0.39, g = 0.02, b = 0.0 }
-                elseif cache.predictedPower >= cache.maxPower - 10 then
-                    color = { r = 1.0, g = 0.0, b = 0.0 }
-                elseif (cache.predictedPower >= (select(4, GetTalentInfo(2, 2, 1)) and 50 or 60)) then
-                    color = { r = 0.56, g = 0.35, b = 0.0 }
-                end
-
-                return true, color
-            end,
             next_events = { "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP" },
             next_dependencies = { "currentPower" },
             next = function(cache, event, ...)
@@ -39,27 +32,17 @@ PRD.configurations.shaman_elemental = {
                     cache.predictedPower = cache.currentPower
                     cache.predictedPowerGain = 0
                     return true, cache.currentPower
-                elseif event == "UNIT_POWER_FREQUENT" then
-                    cache.predictedPower = cache.currentPower + (cache.predictedPowerGain or 0)
-                    cache.predictedPower = math.max(cache.predictedPower, 0)
-                    cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
-                    
+                elseif event == "UNIT_AURA" and select(1, ...) == "player" then
+                    local name, _, count, _ = PRD:GetUnitBuff("player", 260111)
+                    cache.predictedPower = cache.predictedPowerGain + (count or 0)
                     return true, cache.predictedPower
-                end
-
-                if select(1, ...) == "player" then
+                elseif select(1, ...) == "player" then
                     cache.predictedPowerGain = 0                    
                     local SpellCast = select(3, ...)
     
                     if SpellCast == 188196 then --LB
-                        cache.predictedPowerGain = 8
-                    elseif SpellCast == 51505 then --LvB
-                        cache.predictedPowerGain = 10
-                    elseif SpellCast == 210714 then --IF
-                        cache.predictedPowerGain = 25
-                    elseif SpellCast == 188443 then --CL
-                        cache.predictedPowerGain = 12
-                    end 
+                        cache.predictedPowerGain = 1
+                    end
                     
                     cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
                     cache.predictedPower = math.max(cache.predictedPower, 0)
@@ -75,40 +58,88 @@ PRD.configurations.shaman_elemental = {
             enabled_dependencies = { "currentPower" },
             enabled = function(cache, event, ...)
                 return true, cache.currentPower > 0 or UnitAffectingCombat("player")
-            end
+            end,
+            value_dependencies = { "currentPower" },
+            value = function(cache, event, ...)
+                return true, cache.currentPower
+            end,
         },
         tickMarks = {
-            offsets = {
-                spender = {
-                    resourceValue_events = { "PLAYER_TALENT_UPDATE" },
-                    resourceValue = function(cache, event, ...) 
-                        return true, select(4, GetTalentInfo(2, 2, 1)) and 50 or 60
-                    end,
-                    color = { r = 1.0, g = 0.6, b = 0.0 }
-                },
-                spender_2 = {
-                    enabled_events = { "PLAYER_TALENT_UPDATE" },
-                    enabled = function(cache, event, ...)
-                        return true, select(4, GetTalentInfo(2, 2, 1)) and true or false
-                    end,
-                    resourceValue = 100,
-                    color = { r = 1.0, g = 0.6, b = 0.0 }
-                },
-                cap = {
-                    resourceValue = function(cache, event, ...)
-                        return true, cache.maxPower - 10
-                    end,
-                    color = { r = 0.6, g = 0.0, b = 0.0 }
-                },
-                surge_of_power_cap = {
-                    enabled_events = { "PLAYER_TALENT_UPDATE" },
-                    enabled = function(cache, event, ...) 
-                        return true, select(4, GetTalentInfo(6, 1, 1)) and true or false
-                    end,
-                    resourceValue = 94,
-                    color = { r = 1.0, g = 0.0, b = 0.0 }
-                }
-            }
+            offsets = { 1, 2, 3, 4, 5, 6, 7 },
+            color = { r = 1.0, g = 1.0, b = 1.0}
+        }
+    },
+    top = {
+        color = function(cache, event, ...)
+            local r, g, b =  GetClassColor(select(2, UnitClass("player")))
+            return true, { r = r, g = g, b = b }
+        end,
+        currentPower_events = { "UNIT_AURA" },
+        currentPower = function(cache, event, ...)
+            if event == "INITIAL" then
+                cache.currentPower = 0
+            elseif event == "UNIT_AURA" and select(1, ...) ~= "player" then  
+                return false
+            end
+
+            local name, _, count, _ = PRD:GetUnitBuff("player", 319343)
+        
+            if name == nil then
+                cache.currentPower = 0
+                return true, 0, false
+            end
+
+            cache.currentPower = count
+
+            return true, cache.currentPower, count ~= 0
+        end,
+        maxPower = 5,
+        prediction = {
+            next_events = { "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP" },
+            next_dependencies = { "currentPower" },
+            next = function(cache, event, ...)
+                if event == "INITIAL" or (event == "UNIT_SPELLCAST_STOP" and select(1, ...) == "player") then
+                    cache.predictedPower = cache.currentPower
+                    cache.predictedPowerGain = 0
+                    return true, cache.currentPower
+                elseif event == "UNIT_AURA" and select(1, ...) == "player" then
+                    local name, _, count, _ = PRD:GetUnitBuff("player", 319343)
+                    cache.predictedPower = cache.predictedPowerGain + (count or 0)
+                    return true, cache.predictedPower
+                elseif select(1, ...) == "player" then
+                    cache.predictedPowerGain = 0                    
+                    local SpellCast = select(3, ...)
+    
+                    if SpellCast == 188196 then --LB
+                        cache.predictedPowerGain = 1
+                    end
+                    
+                    cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
+                    cache.predictedPower = math.max(cache.predictedPower, 0)
+                    cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
+                    
+                    return true, cache.predictedPower
+                end
+
+                return false
+            end
+        },
+        text = {
+            enabled_dependencies = { "currentPower" },
+            enabled = function(cache, event, ...)
+                return true, cache.currentPower > 0 or UnitAffectingCombat("player")
+            end,
+            value_dependencies = { "currentPower" },
+            value = function(cache, event, ...)
+                return true, cache.currentPower
+            end,
+            size = 10,
+            xOffset = -65,
+            yOffset = -3
+        },
+        tickMarks = {
+            offsets = { 1, 2, 3, 4 },
+            color = { r = 1.0, g = 1.0, b = 1.0}
         }
     },
     bottom = {
@@ -143,7 +174,7 @@ PRD.configurations.shaman_elemental = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -65,
+            xOffset = 65,
             yOffset = 3,
             size = 10
         },
