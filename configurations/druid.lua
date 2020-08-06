@@ -65,10 +65,10 @@ PRD.configurations.druid = {
                     cache.predictedPowerGain = 0
                     local SpellCast = select(3, ...)
     
-                    if SpellCast == 190984 then -- SW
+                    if SpellCast == 190984 then -- Wrath
+                        cache.predictedPowerGain = 6
+                    elseif SpellCast == 194153 then -- Starfire
                         cache.predictedPowerGain = 8
-                    elseif SpellCast == 194153 then -- LS
-                        cache.predictedPowerGain = 12
                     elseif SpellCast == 202347 then -- SF
                         cache.predictedPowerGain = 8
                     elseif SpellCast == 274281 then -- New Moon
@@ -92,7 +92,7 @@ PRD.configurations.druid = {
         tickMarks = {
             color = { r = 1.0, g = 1.0, b = 1.0},
             offsets = { 
-                iron_fur_shred_starsurge = {
+                ironFur_shred = {
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
                     enabled_dependencies = { "powerType" },
                     enabled = function(cache, event, ...)
@@ -112,13 +112,38 @@ PRD.configurations.druid = {
                         local feralSpec = cache.specializationId == 103
                         local catFormWithComboPoints = cache.stanceId == 768 and (balanceWithFeralAffinity or guardianWithFeralAffinity or restorationWithFeralAffinity or feralSpec)
 
-                        local balanceSpecWithMoonkinForm = (cache.specializationId == 102) and (cache.stanceId == 24858)
                         return true, bearFormWithSpenders or catFormWithComboPoints or balanceSpecWithMoonkinForm
                     end,
                     resourceValue = 40,
                     color = { r = 1.0, g = 1.0, b = 1.0}     
                 },
-                frenzied_regen = {
+                starsurge = {
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
+                    enabled_dependencies = { "powerType" },
+                    enabled = function(cache, event, ...)
+                        if event == "INITIAL" or event == "PLAYER_SPECIALIZATION_CHANGED" then
+                            cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
+                        end
+
+                        return true, (cache.specializationId == 102) and (cache.stanceId == 24858)
+                    end,
+                    resourceValue = 30,
+                    color = { r = 1.0, g = 1.0, b = 1.0}  
+                },
+                starfall = {
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
+                    enabled_dependencies = { "powerType" },
+                    enabled = function(cache, event, ...)
+                        if event == "INITIAL" or event == "PLAYER_SPECIALIZATION_CHANGED" then
+                            cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
+                        end
+
+                        return true, (cache.specializationId == 102) and (cache.stanceId == 24858)
+                    end,
+                    resourceValue = 50,
+                    color = { r = 1.0, g = 1.0, b = 1.0}  
+                },
+                frenziedRegen = {
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
                     enabled_dependencies = { "powerType" },
                     enabled = function(cache, event, ...)
@@ -162,7 +187,7 @@ PRD.configurations.druid = {
             offsets = { 1, 2, 3, 4 }
         },
         text = {
-            size = 7,
+            size = 10,
             yOffset = -3,
             xOffset = -65
         }
@@ -350,7 +375,7 @@ PRD.configurations.druid = {
             end,
             xOffset = -65,
             yOffset = 3,
-            size = 7
+            size = 10
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

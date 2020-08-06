@@ -2,43 +2,16 @@ PRD.configurations.priest_shadow = {
     primary = {
         powerType = Enum.PowerType.Insanity,
         color_dependencies = { "currentPower" },
-        color_events = { "UNIT_AURA", "PLAYER_TALENT_UPDATE" },
         color = function(cache, event, ...) 
             local powerTypeColor = PowerBarColor[Enum.PowerType.Insanity]
-            local defaultColor = { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } 
-            local VoidFormReadyColor = { r = 1.0, g = 1.0, b = 1.0 }
-
-            if event == "INITIAL" or (event == "UNIT_AURA" and select(1, ...) == "player") then
-                cache.voidFormActive = (select(1, PRD:GetUnitBuff("player", 194249)) ~= nil)
-            end
-
-            if (cache.currentPower >= (select(4, GetTalentInfo(7, 1, 1)) and 60 or 90)) and not cache.voidFormActive then
-                return true, VoidFormReadyColor
-            else
-                return true, defaultColor
-            end
+            return true, { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } 
         end,
         prediction = {
             color_dependencies = { "next" },
             color_events = { "UNIT_AURA", "PLAYER_TALENT_UPDATE" },
             color = function(cache, event, ...) 
                 local powerTypeColor = PowerBarColor[Enum.PowerType.Insanity]
-                local defaultColor = { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } 
-                local VoidFormReadyColor = { r = 1.0, g = 1.0, b = 1.0 }
-
-                if event == "INITIAL" then
-                    cache.voidFormActive = (select(1, PRD:GetUnitBuff("player", 194249)) ~= nil)
-                elseif event == "UNIT_AURA" and select(1, ...) ~= "player" then
-                    return false
-                end
-
-                cache.voidFormActive = select(1, PRD:GetUnitBuff("player", 194249)) ~= nil
-
-                if (cache.predictedPower >= (select(4, GetTalentInfo(7, 1, 1)) and 60 or 90)) and not cache.voidFormActive then
-                    return true, VoidFormReadyColor
-                else
-                    return true, defaultColor
-                end
+                return true, { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } 
             end,
             next_events = { "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP" },
             next_dependencies = { "currentPower" },
@@ -59,26 +32,15 @@ PRD.configurations.priest_shadow = {
                     cache.predictedPowerGain = 0                    
                     local SpellCast = select(3, ...)
     
-                    if SpellCast == 205351 then -- SW: Void
-                        cache.predictedPowerGain = 15
-                    elseif SpellCast == 32375 then -- Mass Dispel
-                        cache.predictedPowerGain = 6
-                    elseif SpellCast == 34914 then -- Vampric Touch
-                        cache.predictedPowerGain = 6
-                    elseif SpellCast == 263346 then -- Dark Void
-                        cache.predictedPowerGain = 30
-                    elseif SpellCast == 8092 then
+                    if SpellCast == 8092 then -- Mind Blast
                         if select(4, GetTalentInfo(1, 1, 1)) then
                             cache.predictedPowerGain = 12 * .2
                         end
-                        
-                        cache.predictedPowerGain = predictedPowerGain + 12 
+
+                        cache.predictedPowerGain = cache.predictedPowerGain + 12
+                    elseif SpellCast == 34914 then -- Vampric Touch
+                        cache.predictedPowerGain = 6
                     end 
-                    
-                    -- memory buff
-                    if PRD:GetUnitBuff("player", 193223) ~= nil then
-                        cache.predictedPowerGain = cache.predictedPowerGain * 2
-                    end
                     
                     -- stm buff
                     if PRD:GetUnitBuff("player", 298357) ~= nil then
@@ -100,49 +62,24 @@ PRD.configurations.priest_shadow = {
             enabled = function(cache, event, ...)
                 return true, cache.currentPower > 0 or UnitAffectingCombat("player")
             end,
-            value_events = { "UNIT_AURA" },
-            value_dependencies = { "currentPower" },
-            value = function(cache, event, ...)
-                if event == "INITIAL" or (event == "UNIT_AURA" and select(1, ...) == "player") then
-                    local vfname, _, vfcount, _ = PRD:GetUnitBuff("player", 194249)
-
-                    if vfname ~= nil then
-                        cache.voidFormActive = true
-                        cache.voidFormStacks = vfcount
-                    else
-                        cache.voidFormActive = false
-                        cache.voidFormStacks = 0
-                    end
-
-                    local liname, _, licount, _ = PRD:GetUnitBuff("player", 197937)
-
-                    if liname ~= nil then
-                        cache.lingeringInsanityActive = true
-                        cache.lingeringInsanityStacks = licount
-                    else
-                        cache.lingeringInsanityActive = false
-                        cache.lingeringInsanityStacks = 0
-                    end
-                end
-
-                if cache.voidFormActive == true then
-                    return true, cache.currentPower .. "     " .. cache.voidFormStacks
-                elseif cache.lingeringInsanityActive == true then
-                    return true, cache.currentPower .. "    " .. cache.lingeringInsanityStacks
-                end
-
-                return true, cache.currentPower
-            end,
             xOffset = -5
         },
         tickMarks = {
             color = { r = 1.0, g = 1.0, b = 1.0 },
             offsets = {
+                searingNightmare = {
+                    enabled_events = { "PLAYER_TALENT_UPDATE" },
+                    enabled = function(cache, event, ...) 
+                        return true, select(4, GetTalentInfo(3, 3, 1)) and true or false                    
+                    end,
+                    resourceValue = 30
+                },
+                devouringPlague = {
+                    resourceValue = 50,
+                },
                 voidForm = {
                     resourceValue_events = { "PLAYER_TALENT_UPDATE" },
-                    resourceValue = function(cache, event, ...) 
-                        return true, select(4, GetTalentInfo(7, 1, 1)) and 60 or 90                        
-                    end,
+                    resourceValue = 90,
                 }
             }
         }
