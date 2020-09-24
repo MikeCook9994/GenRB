@@ -28,23 +28,23 @@ PRD.configurations.deathknight = {
                 glacial_advance_epidemic = {
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
                     enabled = function(cache, event, ...) 
-                        local glacialAdvanceTalented = (251 == select(1, GetSpecializationInfo(GetSpecialization()))) and (select(4, GetTalentInfo(6, 2, 1)) and true or false)
-                        local epicdemicTalented = (252 == select(1, GetSpecializationInfo(GetSpecialization()))) and (select(4, GetTalentInfo(6, 3, 1)) and true or false)
-                        return true, glacialAdvanceTalented or epicdemicTalented
+                        local specId = select(1, GetSpecializationInfo(GetSpecialization()))
+                        local glacialAdvanceTalented = (251 == specId) and (select(4, GetTalentInfo(6, 2, 1)) and true or false)
+                        return true, glacialAdvanceTalented or specId == 252
                     end,
                     resourceValue = 30,
                     color = { r = 0.75, g = 1.0, b = 1.0 }
                 },
                 death_coil = {
                     resourceValue = 40,
-                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED" },
-                    enabled = function(cache, event, ...)
-                        if event == "UNIT_AURA" and select(1, ...) ~= "player" then
-                            return false
-                        end
+                    -- enabled_events = { "PLAYER_SPECIALIZATION_CHANGED" },
+                    -- enabled = function(cache, event, ...)
+                    --     if event == "UNIT_AURA" and select(1, ...) ~= "player" then
+                    --         return false
+                    --     end
 
-                        return true, 252 == select(1, GetSpecializationInfo(GetSpecialization()))
-                    end,
+                    --     return true, 252 == select(1, GetSpecializationInfo(GetSpecialization()))
+                    -- end,
                     color = { r = 0.75, g = 1.0, b = 0.75 }
                 },
                 death_strike = {
