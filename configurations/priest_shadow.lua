@@ -33,13 +33,14 @@ PRD.configurations.priest_shadow = {
                     local SpellCast = select(3, ...)
     
                     if SpellCast == 8092 then -- Mind Blast
+                        cache.predictedPowerGain = 9
                         if select(4, GetTalentInfo(1, 1, 1)) then
-                            cache.predictedPowerGain = 12 * .2
+                            cache.predictedPowerGain = cache.predictedPowerGain + (9 * .2)
                         end
-
-                        cache.predictedPowerGain = cache.predictedPowerGain + 12
                     elseif SpellCast == 34914 then -- Vampric Touch
-                        cache.predictedPowerGain = 6
+                        cache.predictedPowerGain = 5
+                    elseif SpellCast == 263165 then -- Void Torrent
+                        cache.predictedPowerGain = 30
                     end 
                     
                     -- stm buff
@@ -76,10 +77,6 @@ PRD.configurations.priest_shadow = {
                 },
                 devouringPlague = {
                     resourceValue = 50,
-                },
-                voidForm = {
-                    resourceValue_events = { "PLAYER_TALENT_UPDATE" },
-                    resourceValue = 90,
                 }
             }
         }

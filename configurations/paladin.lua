@@ -56,9 +56,9 @@ PRD.configurations.paladin_retribution = {
         end
     },
     top = {
-        currentPower_events = { "UNIT_HEALTH_FREQUENT" },
+        currentPower_events = { "UNIT_HEALTH" },
         currentPower = function(cache, event, ...) 
-            if event == "UNIT_HEALTH_FREQUENT" and select(1, ...) ~= "player" then
+            if event == "UNIT_HEALTH" and select(1, ...) ~= "player" then
                 return false
             end
 
