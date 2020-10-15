@@ -62,8 +62,7 @@ PRD.configurations.priest_shadow = {
             enabled_dependencies = { "currentPower" },
             enabled = function(cache, event, ...)
                 return true, cache.currentPower > 0 or UnitAffectingCombat("player")
-            end,
-            xOffset = -5
+            end
         },
         tickMarks = {
             color = { r = 1.0, g = 1.0, b = 1.0 },

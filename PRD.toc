@@ -1,7 +1,7 @@
-## Interface: 80300
+## Interface: 90001
 ## Title: PRD
 ## Author: Draenal
-## Version: 0.1
+## Version: 1.1
 ## Notes: A configurable personal resource display
 ## X-Category: Interface Enhancements
 ## DefaultState: Enabled
