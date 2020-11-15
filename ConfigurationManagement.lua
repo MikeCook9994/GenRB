@@ -54,7 +54,7 @@ function PRD:GetConfiguration()
         value = PRD.DefaultUpdateTextHandler,
         color = { r = 1.0, g = 1.0, b = 1.0 },
         font = "Interface\\AddOns\\SharedMediaAdditionalFonts\\fonts\\Accidental Presidency.ttf",
-        size = 10,
+        size = 15,
         flags = "OUTLINE",
         yOffset = 0,
         xOffset = 0
@@ -147,7 +147,7 @@ function PRD:GetConfiguration()
             text.enabled = text.enabled == nil or text.enabled
             text.color = (text.color ~= nil and text.color) or { r = 1.0, g = 1.0, b = 1.0 }
             text.font = (text.font ~= nil and text.font) or "Interface\\AddOns\\SharedMediaAdditionalFonts\\fonts\\Accidental Presidency.ttf"
-            text.size = (text.size ~= nil and text.size) or 14
+            text.size = (text.size ~= nil and text.size) or 20
             text.flags = (text.flags ~= nil and text.flags) or "OUTLINE"
             text.xOffset = (text.xOffset ~= nil and text.xOffset) or 0
             text.yOffset = (text.yOffset ~= nil and text.yOffset) or 0

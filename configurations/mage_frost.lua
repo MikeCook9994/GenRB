@@ -55,9 +55,9 @@ PRD.configurations.mage_frost = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -65,
-            yOffset = 3,
-            size = 10
+            xOffset = -100,
+            yOffset = 5,
+            size = 15
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

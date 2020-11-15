@@ -3,9 +3,9 @@ PRD.configurations.monk_windwalker = {
         powerType = Enum.PowerType.Chi,
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Darkbottom",
         text = {
-            xOffset = -65,
-            yOffset = -3,
-            size = 10
+            xOffset = 100,
+            yOffset = -5,
+            size = 15
         },
         tickMarks = {
             offsets = { 1, 2, 3, 4, 5 }
@@ -47,9 +47,9 @@ PRD.configurations.monk_windwalker = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = 65,
-            yOffset = 3,
-            size = 10
+            xOffset = -100,
+            yOffset = 5,
+            size = 15
         }
     }
 }

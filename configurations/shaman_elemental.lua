@@ -133,9 +133,9 @@ PRD.configurations.shaman_elemental = {
             value = function(cache, event, ...)
                 return true, cache.currentPower
             end,
-            size = 10,
-            xOffset = -65,
-            yOffset = -3
+            xOffset = 100,
+            yOffset = 5,
+            size = 15
         },
         tickMarks = {
             offsets = { 1, 2, 3, 4 },
@@ -174,9 +174,9 @@ PRD.configurations.shaman_elemental = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = 65,
-            yOffset = 3,
-            size = 10
+            xOffset = -100,
+            yOffset = 5,
+            size = 15
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

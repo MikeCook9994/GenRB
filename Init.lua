@@ -7,7 +7,7 @@ function PRD:ReinitializationNeeded()
 end
 
 function PRD:Initialize() 
-    local container = _G["prd_bar_container"] or CreateFrame("Frame", "prd_bar_container")
+    local container = _G["prd_bar_container"] or CreateFrame("Frame", "prd_bar_container", UIParent)
     container:SetPoint("CENTER", UIParent, "CENTER", PRD.x, PRD.y)
     container:SetHeight(PRD.height)
     container:SetWidth(PRD.width)
@@ -22,6 +22,11 @@ function PRD:Initialize()
     container:RegisterEvent("PLAYER_REGEN_ENABLED")
     container:RegisterEvent("PLAYER_REGEN_DISABLED")
 
+    -- automatically hide prd events
+    container:RegisterEvent("CINEMATIC_START")
+    container:RegisterEvent("CINEMATIC_STOP")
+    container:RegisterEvent("PLAYER_FLAGS_CHANGED")
+
     container:SetScript("OnEvent", function(self, event, ...)
         if event == "PLAYER_ENTERING_WORLD" or (event == "PLAYER_SPECIALIZATION_CHANGED" and PRD:ReinitializationNeeded()) then
             PRD:Clean()
@@ -30,6 +35,16 @@ function PRD:Initialize()
             end)
         elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
             PRD:HandleCombatStateChangeEvent(event)
+        elseif event == "CINEMATIC_START" then
+            _G["prd_bar_container"]:Hide()
+        elseif event == "CINEMATIC_STOP" then
+            _G["prd_bar_container"]:Show()
+        elseif event == "PLAYER_FLAGS_CHANGED" then
+            if UnitIsAFK("player") then
+                _G["prd_bar_container"]:Hide()
+            else 
+                _G["prd_bar_container"]:Show()
+            end
         end
     end)
 

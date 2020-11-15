@@ -1,15 +1,11 @@
 PRD.configurations.deathknight = {
     top = {
-        -- enabled_dependencies = { "currentPower" },
-        -- enabled = function(cache, event, ...)
-        --     return true, cache.currentPower ~= 0 or UnitAffectingCombat("player")
-        -- end,
         powerType = Enum.PowerType.RunicPower,
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Darkbottom",
         text = {
-            xOffset = -65,
-            yOffset = -3,
-            size = 10
+            xOffset = -100,
+            yOffset = -5,
+            size = 12
         },
         tickMarks = {
             offsets = {
@@ -117,7 +113,7 @@ PRD.configurations.deathknight = {
             value = function(cache, event, ...) 
                 return true, (("%%d"):format(0):format(cache.maxPower - cache.currentPower))
             end,
-            size = 8
+            size = 12
         },
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 }
@@ -269,9 +265,9 @@ PRD.configurations.deathknight = {
             value = function(cache, event, ...)
                 return true, string.format("%.1f%%", (cache.predictedHeal / cache.maxPower) * 100)
             end,
-            xOffset = 65,
-            yOffset = 2,
-            size = 10
+            xOffset = 100,
+            yOffset = 5,
+            size = 12
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

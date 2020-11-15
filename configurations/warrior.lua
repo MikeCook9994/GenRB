@@ -69,9 +69,9 @@ PRD.configurations.warrior = {
             value = function(cache, event, ...)
                 return true, string.format("%.0f%%", (cache.currentPower / cache.maxPower) * 100)
             end,
-            xOffset = 65,
-            yOffset = 2,
-            size = 8
+            xOffset = 100,
+            yOffset = 5,
+            size = 15
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

@@ -187,9 +187,9 @@ PRD.configurations.druid = {
             offsets = { 1, 2, 3, 4 }
         },
         text = {
-            size = 10,
-            yOffset = -3,
-            xOffset = -65
+            xOffset = 100,
+            yOffset = -5,
+            size = 15
         }
     },
     top_left = {
@@ -373,9 +373,9 @@ PRD.configurations.druid = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -65,
-            yOffset = 3,
-            size = 10
+            xOffset = -100,
+            yOffset = 5,
+            size = 15
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)
