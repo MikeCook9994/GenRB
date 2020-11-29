@@ -1,7 +1,7 @@
 PRD = {
-    width = 240,
+    width = 238,
     height = 25,
-    x = 0,
+    x = 0.5,
     y = -215,
     container = nil,
     currentSpecKey = nil,
