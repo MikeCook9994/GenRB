@@ -23,6 +23,7 @@ configurations\shaman_restoration.lua
 configurations\warlock.lua
 configurations\priest_shadow.lua
 configurations\priest.lua
+configurations\priest_discipline.lua
 configurations\druid.lua
 configurations\deathknight.lua
 configurations\mage_arcane.lua

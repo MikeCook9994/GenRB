@@ -80,7 +80,7 @@ PRD.configurations.priest_shadow = {
             }
         }
     },
-    bottom = {
+    top = {
         powerType = Enum.PowerType.Mana,
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },
@@ -112,8 +112,8 @@ PRD.configurations.priest_shadow = {
                 end
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -100,
-            yOffset = 5,
+            xOffset = -140,
+            yOffset = -5,
             size = 15
         },
         color_dependencies = { "currentPower", "maxPower" },
