@@ -1,0 +1,9 @@
+{
+    "Lua.diagnostics.globals": [
+        "Enum"
+    ],
+    "Lua.diagnostics.disable": [
+        "undefined-global",
+        "undefined-global"
+    ]
+}

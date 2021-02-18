@@ -25,12 +25,12 @@ PRD.configurations.druid = {
                 cache.powerType = Enum.PowerType.Mana
                 return true, Enum.PowerType.Mana
             end
-            
+
             return false
         end,
         text = {
             enabled_dependencies = { "currentPower" },
-            enabled = function(cache, event, ...) 
+            enabled = function(cache, event, ...)
                 return true, cache.currentPower > 0 or UnitAffectingCombat("player")
             end
         },
@@ -39,8 +39,8 @@ PRD.configurations.druid = {
             enabled = function(cache, event, ...)
                 return true, cache.stanceId == 24858
             end,
-            color = { 
-                r = PowerBarColor[Enum.PowerType.LunarPower].r, 
+            color = {
+                r = PowerBarColor[Enum.PowerType.LunarPower].r,
                 g = PowerBarColor[Enum.PowerType.LunarPower].g,
                 b = PowerBarColor[Enum.PowerType.LunarPower].b
             },
@@ -51,20 +51,18 @@ PRD.configurations.druid = {
                     cache.predictedPower = cache.currentPower
                     cache.predictedPowerGain = 0
                     return true, cache.currentPower
-                elseif event == "UNIT_POWER_FREQUENT" then
+                elseif event == "UNIT_POWER_FREQUENT" or event == "UNIT_AURA" then
                     cache.predictedPower = cache.currentPower + (cache.predictedPowerGain or 0)
                     cache.predictedPower = math.max(cache.predictedPower, 0)
                     cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
-                    
+
                     return true, cache.predictedPower
-                elseif event == "UNIT_AURA" then
-                    return false
                 end
 
                 if select(1, ...) == "player" then
                     cache.predictedPowerGain = 0
                     local SpellCast = select(3, ...)
-    
+
                     if SpellCast == 190984 then -- Wrath
                         cache.predictedPowerGain = 6
                     elseif SpellCast == 194153 then -- Starfire
@@ -77,12 +75,12 @@ PRD.configurations.druid = {
                         cache.predictedPowerGain = 20
                     elseif SpellCast == 274283 then -- Full Moon
                         cache.predictedPowerGain = 40
-                    end 
-    
-                    cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
+                    end
+
+                    cache.predictedPower = cache.currentPower + cache.predictedPowerGain
                     cache.predictedPower = math.max(cache.predictedPower, 0)
                     cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
-    
+
                     return true, cache.predictedPower
                 end
 
@@ -91,7 +89,7 @@ PRD.configurations.druid = {
         },
         tickMarks = {
             color = { r = 1.0, g = 1.0, b = 1.0},
-            offsets = { 
+            offsets = {
                 ironFur_shred = {
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
                     enabled_dependencies = { "powerType" },
@@ -105,7 +103,7 @@ PRD.configurations.druid = {
                         local restorationWithGuardianAffinity = (cache.specializationId == 105) and select(4, GetTalentInfo(3, 3, 1))
                         local guardianSpec = cache.specializationId == 104
                         local bearFormWithSpenders = cache.stanceId == 5487 and (balanceWithGuardianAffinity or feralWithGuardianAffinity or restorationWithGuardianAffinity or guardianSpec)
-                        
+
                         local balanceWithFeralAffinity = (cache.specializationId == 102) and select(4, GetTalentInfo(3, 1, 1))
                         local guardianWithFeralAffinity = (cache.specializationId == 105) and select(4, GetTalentInfo(3, 2, 1))
                         local restorationWithFeralAffinity = (cache.specializationId == 104) and select(4, GetTalentInfo(3, 2, 1))
@@ -115,9 +113,9 @@ PRD.configurations.druid = {
                         return true, bearFormWithSpenders or catFormWithComboPoints or balanceSpecWithMoonkinForm
                     end,
                     resourceValue = 40,
-                    color = { r = 1.0, g = 1.0, b = 1.0}     
+                    color = { r = 1.0, g = 1.0, b = 1.0}
                 },
-                starsurge = {
+                starsurge_30 = {
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
                     enabled_dependencies = { "powerType" },
                     enabled = function(cache, event, ...)
@@ -128,7 +126,33 @@ PRD.configurations.druid = {
                         return true, (cache.specializationId == 102) and (cache.stanceId == 24858)
                     end,
                     resourceValue = 30,
-                    color = { r = 1.0, g = 1.0, b = 1.0}  
+                    color = { r = 1.0, g = 1.0, b = 1.0}
+                },
+                starsurge_60 = {
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
+                    enabled_dependencies = { "powerType" },
+                    enabled = function(cache, event, ...)
+                        if event == "INITIAL" or event == "PLAYER_SPECIALIZATION_CHANGED" then
+                            cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
+                        end
+
+                        return true, (cache.specializationId == 102) and (cache.stanceId == 24858)
+                    end,
+                    resourceValue = 60,
+                    color = { r = 1.0, g = 1.0, b = 1.0}
+                },
+                starsurge_90 = {
+                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
+                    enabled_dependencies = { "powerType" },
+                    enabled = function(cache, event, ...)
+                        if event == "INITIAL" or event == "PLAYER_SPECIALIZATION_CHANGED" then
+                            cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
+                        end
+
+                        return true, (cache.specializationId == 102) and (cache.stanceId == 24858)
+                    end,
+                    resourceValue = 90,
+                    color = { r = 1.0, g = 1.0, b = 1.0}
                 },
                 starfall = {
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
@@ -141,7 +165,7 @@ PRD.configurations.druid = {
                         return true, (cache.specializationId == 102) and (cache.stanceId == 24858)
                     end,
                     resourceValue = 50,
-                    color = { r = 1.0, g = 1.0, b = 1.0}  
+                    color = { r = 1.0, g = 1.0, b = 1.0}
                 },
                 frenziedRegen = {
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
@@ -150,7 +174,7 @@ PRD.configurations.druid = {
                         if event == "INITIAL" or event == "PLAYER_SPECIALIZATION_CHANGED" then
                             cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
                         end
-                        
+
                         local balanceWithGuardianAffinity = (cache.specializationId == 102) and select(4, GetTalentInfo(3, 2, 1))
                         local feralWithGuardianAffinity = (cache.specializationId == 103) and select(4, GetTalentInfo(3, 2, 1))
                         local restorationWithGuardianAffinity = (cache.specializationId == 105) and select(4, GetTalentInfo(3, 3, 1))
@@ -158,7 +182,7 @@ PRD.configurations.druid = {
                         return true, (cache.stanceId == 5487) and (balanceWithGuardianAffinity or feralWithGuardianAffinity or restorationWithGuardianAffinity or guardianSpec)
                     end,
                     resourceValue = 10,
-                    color = { r = 1.0, g = 1.0, b = 1.0}     
+                    color = { r = 1.0, g = 1.0, b = 1.0}
                 }
             }
         },
@@ -187,114 +211,16 @@ PRD.configurations.druid = {
             offsets = { 1, 2, 3, 4 }
         },
         text = {
-            xOffset = 100,
+            xOffset = 140,
             yOffset = -5,
             size = 15
         }
-    },
-    top_left = {
-        enabled_events = { "UNIT_AURA" },
-        enabled = function(cache, event, ...)
-            if event == "INITIAL" or (event == "UNIT_AURA" and select(1, ...) == "player") then
-                return true, (select(1, PRD:GetUnitBuff("player", 24858)) ~= nil) or (select(1, PRD:GetUnitBuff("player", 197625)) ~= nil)
-            end
-
-            return false
-        end,
-        color = { r = 1.0, g = 1.0, b = 0.0},
-        tickMarks = {
-            offsets = {
-                zero = {
-                    color = { r = 0.5, g = 0.5, b = 0.5},
-                    resourceValue = 0
-                },
-                one = {
-                    color = { r = 1.0, g = 1.0, b = 1.0},
-                    resourceValue = 1
-                },
-                two = {
-                    color = { r = 1.0, g = 1.0, b = 1.0},
-                    resourceValue = 2
-                }
-            }
-        },
-        texture = "Interface\\Addons\\SharedMedia\\statusbar\\Perl",
-        maxPower = 3,
-        currentPower_events = { "UNIT_AURA" },
-        currentPower = function(cache, event, ...)
-            if event == "UNIT_AURA" and select(1, ...) ~= "player" then
-                return false
-            end
-
-            local name, _, count, _, duration, expirationTime = PRD:GetUnitBuff("player", 164545)
-        
-            if name == nil then
-                cache.currentPower = 0
-                return true, 0, false
-            end
-
-            cache.currentPower = (count - 1) + ((expirationTime - GetTime()) / duration)
-
-            return true, cache.currentPower, count ~= 0
-        end,
-        text = {
-            enabled = false
-        },
-    },
-    top_right = {
-        enabled_events = { "UNIT_AURA" },
-        enabled = function(cache, event, ...)
-            if event == "INITIAL" or (event == "UNIT_AURA" and select(1, ...) == "player") then
-                return true, (select(1, PRD:GetUnitBuff("player", 24858)) ~= nil) or (select(1, PRD:GetUnitBuff("player", 197625)) ~= nil)
-            end
-
-            return false
-        end,
-        color = { r = 1.0, g = 0.0, b = 1.0},
-        tickMarks = {
-            offsets = {
-                zero = {
-                    color = { r = 0.5, g = 0.5, b = 0.5},
-                    resourceValue = 0
-                },
-                one = {
-                    color = { r = 1.0, g = 1.0, b = 1.0},
-                    resourceValue = 1
-                },
-                two = {
-                    color = { r = 1.0, g = 1.0, b = 1.0},
-                    resourceValue = 2
-                }
-            }
-        },
-        texture = "Interface\\Addons\\SharedMedia\\statusbar\\Perl",
-        maxPower = 3,
-        currentPower_events = { "UNIT_AURA" },
-        currentPower = function(cache, event, ...)
-            if event == "UNIT_AURA" and select(1, ...) ~= "player" then
-                return false
-            end
-
-            local name, _, count, _, duration, expirationTime = PRD:GetUnitBuff("player", 164547)
-        
-            if name == nil then
-                cache.currentPower = 0
-                return true, 0, false
-            end
-
-            cache.currentPower = (count - 1) + ((expirationTime - GetTime()) / duration)
-
-            return true, cache.currentPower, count ~= 0
-        end,
-        text = {
-            enabled = false
-        },
     },
     bottom = {
         powerType = Enum.PowerType.Mana,
         enabled_events = { "UNIT_AURA", "PLAYER_SPECIALIZATION_CHANGED" },
         enabled = function(cache, event, ...)
-            if event == "INITIAL" or event == "PLAYER_SPECIALIZATION_CHANGED" then 
+            if event == "INITIAL" or event == "PLAYER_SPECIALIZATION_CHANGED" then
                 cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
             end
 
@@ -339,14 +265,14 @@ PRD.configurations.druid = {
 
                     return false
                 end
-                
+
                 local spellCost = GetSpellPowerCost(8936)[1].cost
                 if (spellCost == 0) then
                     return true, resourceValues
                 end
 
                 local currentMaxTick = 0
-                
+
                 while currentMaxTick + spellCost <= cache.maxPower do
                     currentMaxTick = currentMaxTick + spellCost
                     table.insert(resourceValues, currentMaxTick)
@@ -373,7 +299,7 @@ PRD.configurations.druid = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -100,
+            xOffset = -140,
             yOffset = 5,
             size = 15
         },
