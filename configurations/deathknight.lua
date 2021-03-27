@@ -3,9 +3,9 @@ PRD.configurations.deathknight = {
         powerType = Enum.PowerType.RunicPower,
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Darkbottom",
         text = {
-            xOffset = -100,
+            xOffset = -140,
             yOffset = -5,
-            size = 12
+            size = 15
         },
         tickMarks = {
             offsets = {
@@ -265,9 +265,9 @@ PRD.configurations.deathknight = {
             value = function(cache, event, ...)
                 return true, string.format("%.1f%%", (cache.predictedHeal / cache.maxPower) * 100)
             end,
-            xOffset = 100,
+            xOffset = 140,
             yOffset = 5,
-            size = 12
+            size = 15
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

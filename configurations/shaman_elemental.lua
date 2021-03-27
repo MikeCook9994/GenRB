@@ -96,7 +96,7 @@ PRD.configurations.shaman_elemental = {
             }
         }
     },
-    bottom = {
+    top = {
         powerType = Enum.PowerType.Mana,
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },
@@ -128,9 +128,9 @@ PRD.configurations.shaman_elemental = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -65,
-            yOffset = 3,
-            size = 10
+            xOffset = -140,
+            yOffset = -5,
+            size = 15
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

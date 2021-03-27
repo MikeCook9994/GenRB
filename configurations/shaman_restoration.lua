@@ -35,8 +35,8 @@ PRD.configurations.shaman_restoration = {
                 local buffDuration = cache.duration == 0 and "" or (("%%.%df"):format(0)):format((cache.expirationTime - GetTime()))
                 return true, currentStacks .. " " .. buffDuration
             end,
-            xOffset = 100,
-            yOffset = 5,
+            xOffset = 140,
+            yOffset = -5,
             size = 15
         },
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Darkbottom",
