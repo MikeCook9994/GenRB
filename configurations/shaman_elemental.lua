@@ -10,6 +10,8 @@ PRD.configurations.shaman_elemental = {
                 color = { r = 0.39, g = 0.02, b = 0.0 }
             elseif cache.currentPower >= cache.maxPower - 10 then
                 color = { r = 1.0, g = 0.0, b = 0.0 }
+            elseif cache.currentPower >= 60 then
+                color = { r = 0.56, g = 0.35, b = 0.0 }
             end
 
             return true, color
@@ -24,6 +26,8 @@ PRD.configurations.shaman_elemental = {
                     color = { r = 0.39, g = 0.02, b = 0.0 }
                 elseif cache.predictedPower >= cache.maxPower - 10 then
                     color = { r = 1.0, g = 0.0, b = 0.0 }
+                elseif cache.currentPower >= 60 then
+                    color = { r = 0.56, g = 0.35, b = 0.0 }
                 end
 
                 return true, color

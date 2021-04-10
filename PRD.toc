@@ -31,5 +31,6 @@ configurations\mage_fire.lua
 configurations\mage_frost.lua
 configurations\warrior.lua
 configurations\paladin.lua
+configurations\paladin_retribution.lua
 configurations\monk_windwalker.lua
 configurations\hunter_marksmanship.lua
