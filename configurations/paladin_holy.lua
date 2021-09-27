@@ -19,7 +19,11 @@ PRD.configurations.paladin_holy = {
             local r, g, b = GetClassColor("PALADIN")
             local percent = cache.currentPower / cache.maxPower
             return true, { r = r, g = g, b = b * percent }
-        end
+        end,
+        value_dependencies = { "currentPower", "maxPower" },
+        value = function(cache, event, ...)
+            return true, string.format("%.0f%%", (cache.currentPower / cache.maxPower) * 100)
+        end,
     },
     top = {
         currentPower_events = { "UNIT_HEALTH" },
