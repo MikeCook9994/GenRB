@@ -133,7 +133,7 @@ function PRD:InitializeTickMark(barName, tickId, parent, tickWidth, texture, col
     tickFrame:SetParent(parent)
     tickFrame:SetWidth(tickWidth)
     tickFrame:SetHeight(parent:GetHeight())
-    tickFrame:SetPoint("LEFT", parent, "LEFT", resourceRatio * parent:GetWidth(), 0)
+    tickFrame:SetPoint("LEFT", parent, "LEFT", (resourceRatio * parent:GetWidth()) - (tickWidth / 2), 0)
     tickFrame:SetFrameStrata("HIGH")
     
     tickFrame.texture = _G[frameName .. "_texture"] or tickFrame:CreateTexture(frameName .. "_texture")

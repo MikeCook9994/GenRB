@@ -4,6 +4,11 @@ PRD.configurations.priest_shadow = {
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...) 
             local powerTypeColor = PowerBarColor[Enum.PowerType.Insanity]
+
+            if cache.currentPower >= 50 then
+                return true, { r = powerTypeColor.r + 0.25, g = powerTypeColor.g + 0.25, b = powerTypeColor.b + 0.25 } 
+            end
+
             return true, { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } 
         end,
         prediction = {
@@ -11,6 +16,11 @@ PRD.configurations.priest_shadow = {
             color_events = { "UNIT_AURA", "PLAYER_TALENT_UPDATE" },
             color = function(cache, event, ...) 
                 local powerTypeColor = PowerBarColor[Enum.PowerType.Insanity]
+
+                if cache.currentPower >= 50 then
+                    return true, { r = powerTypeColor.r + 0.25, g = powerTypeColor.g + 0.25, b = powerTypeColor.b + 0.25 } 
+                end
+
                 return true, { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } 
             end,
             next_events = { "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP" },

@@ -98,7 +98,7 @@ function PRD:RefreshTickMarkXOffset(eventHandler, self, event, ...)
     end
 
     if shouldUpdate then
-        self:SetPoint("LEFT", self:GetParent(), "LEFT", (newValue / self.cache.maxPower) * PRD.width, 0)
+        self:SetPoint("LEFT", self:GetParent(), "LEFT", ((newValue / self.cache.maxPower) * PRD.width) - (self:GetWidth() / 2), 0)
     end
 
     return frameUpdates
