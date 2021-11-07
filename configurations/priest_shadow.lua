@@ -17,7 +17,7 @@ PRD.configurations.priest_shadow = {
             color = function(cache, event, ...) 
                 local powerTypeColor = PowerBarColor[Enum.PowerType.Insanity]
 
-                if cache.currentPower >= 50 then
+                if cache.predictedPower >= 50 then
                     return true, { r = powerTypeColor.r + 0.25, g = powerTypeColor.g + 0.25, b = powerTypeColor.b + 0.25 } 
                 end
 
