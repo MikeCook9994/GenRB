@@ -271,7 +271,6 @@ function PRD:InitializeRuneProgressBar(barName, specBarConfig, runeIndex)
     barContainer.cache = cache
     PRD.bars[barName][runeIndex][barContainer:GetName()] = barContainer
 
-
     -- initialize status bar
     local statusBarColor = type(specBarConfig.color) == "function" and select(2, specBarConfig.color(cache, "INITIAL")) or specBarConfig.color
     local statusBar = PRD:InitializeStatusBar(barName .. "_" .. runeIndex .. "_main_bar", barContainer, shiftedPositionConfig, "MEDIUM", specBarConfig.texture, statusBarColor, cache.currentPower / cache.maxPower, true)

@@ -2,7 +2,7 @@ PRD.configurations.priest_discipline = {
     primary = {
         color = { r = 1.0, g = 1.0, b = 1.0 }
     },
-    bottom = {
+    top = {
         currentPower_events = { "SPELL_UPDATE_CHARGES" },
         currentPower = function(cache, event, ...)
             local currentCharges, maxCharges, start, duration = GetSpellCharges(194509)
@@ -21,9 +21,7 @@ PRD.configurations.priest_discipline = {
                 local cooldown = cache.currentCharges == 2 and "" or (("%%.%df"):format(0)):format((cache.duration - (GetTime() - cache.start)))
                 return true, currentCharges .. " " .. cooldown
             end,
-            size = 15,
-            xOffset = -140,
-            yOffset = 5
+            size = 25,
         },
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Glamour7",
         color_dependencies = { "currentPower" },

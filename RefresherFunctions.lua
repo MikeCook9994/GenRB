@@ -9,7 +9,7 @@ function PRD:RefreshCurrentPowerValue(eventHandler, self, event, ...)
     local shouldUpdate, newValue, frameUpdates = eventHandler(self.cache, event, ...)
 
     if shouldUpdate then
-        self:SetValue(newValue / self.cache.maxPower)
+        self:SetValue(newValue / (self.cache.maxPower or 1))
     end
 
     return frameUpdates

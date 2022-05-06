@@ -6,6 +6,7 @@ configuration defined below. Simply adding a configuration file to the addon con
 is all that needs to be done.
 
 ## Contract
+
 ```lua
 -- note that you can specify class specific configurations by dropping _specialization in the property name below (e.g. PRD.configurations.class)
 PRD.configurations.class_specialization = {
@@ -102,13 +103,13 @@ You can specify a function as an event handler in your configuration wherever th
 |---|---|---|
 | cache | table | see the [THE CACHE OBJECT](#the-cache-object) documentation below |
 | event | string | the name of the event |
-| args | defined by wow api |the events args | 
+| args | defined by wow api |the events args |
 
 | output | type | description |
 |---|---|---|
 | shouldUpdate | boolean | true if the related entity should be updated. Not all instances of an event may require an update of the bar |
 | value | * | the value to update the bar with. See [EVENT HANDLER RETURN TYPES](#event-handler-return-types)
-| processFrameUpdates | boolean | if true, indicates this function should be called every fame until this event handler returns false or nil for this value. This allows us to track auras and spell cooldowns that do not have events associated with their progress. 
+| processFrameUpdates | boolean | if true, indicates this function should be called every fame until this event handler returns false or nil for this value. This allows us to track auras and spell cooldowns that do not have events associated with their progress.
 
 #### FRAME UPDATES
 
@@ -143,6 +144,7 @@ To handle the initial event, your event handler should be prepared to return a r
 #### THE CACHE OBJECT
 
 Each bar (top, bottom, primary, etc...) maintains an object ("the cache") that your configuration is free to write to and read from. During initialization it is populated with the following:
+
 * powerType (this may just be the specs default powerType if your bar is tracking an aura or cd)
 * currentPower
 * maxPower
@@ -153,7 +155,7 @@ The cache is also just a scratch area where you are free to stick any state you 
 
 ### SPECIFYING EVENTS OR DEPENDENCIES IN YOUR CONFIGURATION
 
-Wherever you specify an event handler you can define the events it's registered to by specifying a property of the form `${property}_event` within the same scope block as the event handler function. 
+Wherever you specify an event handler you can define the events it's registered to by specifying a property of the form `${property}_event` within the same scope block as the event handler function.
 
 ```lua
     {

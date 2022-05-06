@@ -113,19 +113,6 @@ PRD.configurations.priest_shadow = {
                 return true, resourceValues
             end
         },
-        text = {
-            value_dependencies = { "currentPower", "maxPower" },
-            value = function(cache, event, ...)
-                local spellCost = GetSpellPowerCost(186263)[1].cost
-                if (spellCost == 0) then
-                    return true, ""
-                end
-                return true, math.floor(cache.currentPower / spellCost)
-            end,
-            xOffset = -140,
-            yOffset = -5,
-            size = 15
-        },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)
             local percent = cache.currentPower / cache.maxPower
