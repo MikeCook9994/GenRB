@@ -17,20 +17,31 @@ Init.lua
 
 # configurations
 configurations\rogue.lua
+configurations\rogue_subtlety.lua
+
 configurations\shaman_elemental.lua
 configurations\shaman_enhancement.lua
 configurations\shaman_restoration.lua
+
 configurations\warlock.lua
-configurations\priest_shadow.lua
+
 configurations\priest.lua
+configurations\priest_shadow.lua
 configurations\priest_discipline.lua
+
 configurations\druid.lua
+
 configurations\deathknight.lua
+
 configurations\mage_arcane.lua
 configurations\mage_fire.lua
 configurations\mage_frost.lua
+
 configurations\warrior.lua
+
 configurations\paladin.lua
 configurations\paladin_holy.lua
+
 configurations\monk_windwalker.lua
+
 configurations\hunter_marksmanship.lua

@@ -48,7 +48,7 @@ PRD.configurations.shaman_elemental = {
                 end
 
                 if select(1, ...) == "player" then
-                    cache.predictedPowerGain = 0                    
+                    cache.predictedPowerGain = 0
                     local SpellCast = select(3, ...)
     
                     if SpellCast == 188196 then --LB
