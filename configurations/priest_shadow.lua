@@ -80,7 +80,7 @@ PRD.configurations.priest_shadow = {
                 searingNightmare = {
                     enabled_events = { "PLAYER_TALENT_UPDATE" },
                     enabled = function(cache, event, ...) 
-                        return true, select(4, GetTalentInfo(3, 3, 1)) and true or false                    
+                        return true, select(4, GetTalentInfo(3, 3, 1)) and true or false
                     end,
                     resourceValue = 30
                 },
@@ -98,7 +98,7 @@ PRD.configurations.priest_shadow = {
             offsets = function(cache, event, ...)
                 local resourceValues = { }
 
-                local spellCost = GetSpellPowerCost(186263)[1].cost
+                local spellCost = GetSpellPowerCost(2061)[1].cost
                 if (spellCost == 0) then
                     return true, resourceValues
                 end
