@@ -54,15 +54,22 @@ function PRD:Initialize()
     end)
 
     PRD.container = container
+
+    local weakAuraParent = _G["prd_weakaura_container"] or CreateFrame("Frame", "prd_weakaura_container", container)
+    weakAuraParent:SetPoint("CENTER", container, "CENTER", 0, 0)
+    weakAuraParent:SetHeight(PRD.height)
+    weakAuraParent:SetWidth(PRD.width)
+    weakAuraParent:SetFrameStrata("BACKGROUND")
+    weakAuraParent:Show()
 end
 
 function PRD:HandleCombatStateChangeEvent(event)
     local alpha = (event == "PLAYER_REGEN_DISABLED") and 1.0 or 0.25 
     for _, bar in ipairs({ PRD.container:GetChildren() }) do
         for _, child in ipairs({ bar:GetChildren() }) do
-            if string.find(child:GetName(), "_prediction_bar") then
+            if string.find(child:GetName() or "", "_prediction_bar") then
                 child:SetAlpha(alpha * .75)
-            elseif string.find(child:GetName(), "_background_bar") then 
+            elseif string.find(child:GetName() or "", "_background_bar") then 
                 child:SetAlpha(alpha * .5)
             else
                 child:SetAlpha(alpha)
@@ -125,16 +132,6 @@ function PRD:HandleFrameUpdates()
             PRD:HandleEvent(handlerConfig.self.dependencyHandlers[handlerConfig.property], FRAME_UPDATE_EVENT)
         end
     end
-end
-
-function PRD:TableCount(table)
-    local count = 0
-
-    for k, v in pairs(PRD.frameUpdates) do
-        count = count + 1
-    end
-
-    return count
 end
 
 PRD:Initialize() 
