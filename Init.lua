@@ -71,7 +71,7 @@ function PRD:HandleCombatStateChangeEvent(event)
                 child:SetAlpha(alpha * .75)
             elseif string.find(child:GetName() or "", "_background_bar") then 
                 child:SetAlpha(alpha * .5)
-            else
+            elseif string.find(child:GetName() or "", "prd_") then
                 child:SetAlpha(alpha)
             end
         end
