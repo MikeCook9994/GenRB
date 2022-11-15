@@ -54,17 +54,10 @@ function PRD:Initialize()
     end)
 
     PRD.container = container
-
-    local weakAuraParent = _G["prd_weakaura_container"] or CreateFrame("Frame", "prd_weakaura_container", container)
-    weakAuraParent:SetPoint("CENTER", container, "CENTER", 0, 0)
-    weakAuraParent:SetHeight(PRD.height)
-    weakAuraParent:SetWidth(PRD.width)
-    weakAuraParent:SetFrameStrata("BACKGROUND")
-    weakAuraParent:Show()
 end
 
 function PRD:HandleCombatStateChangeEvent(event)
-    local alpha = (event == "PLAYER_REGEN_DISABLED") and 1.0 or 0.25 
+    local alpha = (event == "PLAYER_REGEN_DISABLED") and 1.0 or 1.0
     for _, bar in ipairs({ PRD.container:GetChildren() }) do
         for _, child in ipairs({ bar:GetChildren() }) do
             if string.find(child:GetName() or "", "_prediction_bar") then

@@ -1,5 +1,5 @@
 PRD.configurations.druid = {
-    primary = {
+    [1] = {
         powerType_events = { "UNIT_AURA" },
         powerType = function(cache, event, ...)
             if event == "INITIAL" or (event == "UNIT_AURA" and select(1, ...) == "player") then
@@ -187,7 +187,7 @@ PRD.configurations.druid = {
             }
         },
     },
-    top = {
+    [2] = {
         powerType = Enum.PowerType.ComboPoints,
         enabled_events = { "PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED", "UNIT_AURA" },
         enabled = function(cache, event, ...)
@@ -216,7 +216,7 @@ PRD.configurations.druid = {
             size = 15
         }
     },
-    bottom = {
+    [0] = {
         powerType = Enum.PowerType.Mana,
         enabled_events = { "UNIT_AURA", "PLAYER_SPECIALIZATION_CHANGED" },
         enabled = function(cache, event, ...)

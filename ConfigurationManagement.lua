@@ -62,6 +62,7 @@ function PRD:GetConfiguration()
 
     local defaultPrimaryConfig = {
         enabled = true,
+        heightWeight = 5,
         powerType = playerPowerType,
         currentPower_events = { "UNIT_POWER_FREQUENT" },
         currentPower = PRD.DefaultUpdateCurrentPowerHandler,
@@ -74,25 +75,26 @@ function PRD:GetConfiguration()
             enabled = false,
         },
         tickMarks = {
-            enabled = false
+            enabled = false,
+            width = 3
         }
     }
 
     if configKey == nil then
         return {
-            primary = defaultPrimaryConfig
+            [0] = defaultPrimaryConfig
         }
     end
 
     local config = PRD.configurations[configKey]
 
-    if config.primary == nil then
-        config.primary = defaultPrimaryConfig
-    elseif config.primary.text == nil then
-        config.primary.text = defaultTextConfig
+    if config[0] == nil then
+        config[0] = defaultPrimaryConfig
+    elseif config[0].text == nil then
+        config[0].text = defaultTextConfig
     end
 
-    for barName, barConfig in pairs(config) do
+    for barPriority, barConfig in pairs(config) do
         -- top level bar properties
         if barConfig.powerType == nil and barConfig.currentPower == nil and barConfig.maxPower == nil then
             barConfig.powerType = playerPowerType
@@ -112,7 +114,7 @@ function PRD:GetConfiguration()
         -- and maxPower must be reevaluated if it's a function. But I can't imagine
         -- a world where powerType is a function and maxPower isn't.
         -- Additionally, color should be updated with the new 
-        if (barConfig.powerType ~= nil and type(barConfig.powerType) == "function") then
+        if barConfig.powerType ~= nil and type(barConfig.powerType) == "function" then
             barConfig.currentPower_dependencies = { "powerType" }
 
             if type(barConfig.maxPower) == "function" then
@@ -124,10 +126,13 @@ function PRD:GetConfiguration()
                 barConfig.color = PRD.DefaultUpdateColorHandler
             end
         end
-        
+
         barConfig.enabled = barConfig.enabled == nil or barConfig.enabled
-        barConfig.color = barConfig.color == nil and { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b } or barConfig.color
-        barConfig.texture = barConfig.texture == nil and "Interface\\Addons\\SharedMedia\\statusbar\\Cilo" or barConfig.texture
+        print(barConfig.heightWeight)
+        barConfig.heightWeight = (barConfig.heightWeight ~= nil and barConfig.heightWeight) or 1
+        print(barConfig.heightWeight)
+        barConfig.color = (barConfig.color ~= nil and barConfig.color) or { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b }
+        barConfig.texture = (barConfig.texture ~= nil and barConfig.texture) or "Interface\\Addons\\SharedMedia\\statusbar\\Cilo"
 
         -- prediction config defaults
         if barConfig.prediction ~= nil and barConfig.text.enabled ~= false then
@@ -165,9 +170,10 @@ function PRD:GetConfiguration()
         -- tick mark config default
         if barConfig.tickMarks ~= nil then
             local tickMarks = barConfig.tickMarks
-            tickMarks.enabled = tickMarks.enabled == nil or tickMarks.enabled
+            tickMarks.enabled = tickMarks.enabled == nil or tickMarks.enabled 
             tickMarks.texture = (tickMarks.texture ~= nil and tickMarks.texture) or "Interface\\Addons\\SharedMedia\\statusbar\\Aluminium"
             tickMarks.color = (tickMarks.color ~= nil and tickMarks.color) or { r = 1.0, g = 1.0, b = 1.0 }
+            tickMarks.width = (tickMarks.width ~= nil and tickMarks.width) or 2
 
             if type(tickMarks.offsets) == "function" then
                 if tickMarks.offsets_dependencies == nil then

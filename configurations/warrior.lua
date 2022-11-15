@@ -1,5 +1,5 @@
 PRD.configurations.warrior = {
-    primary = {
+    [0] = {
         tickMarks = {
             offsets = {
                 fury_rampage = {

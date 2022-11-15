@@ -39,7 +39,7 @@ PRD.configurations.priest_shadow = {
                 end
                 
                 if select(1, ...) == "player" then
-                    cache.predictedPowerGain = 0                    
+                    cache.predictedPowerGain = 0
                     local SpellCast = select(3, ...)
     
                     if SpellCast == 8092 then -- Mind Blast
@@ -62,7 +62,7 @@ PRD.configurations.priest_shadow = {
                     cache.predictedPower = math.max(cache.predictedPower, 0)
                     cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
     
-                    return true, cache.predictedPower   
+                    return true, cache.predictedPower
                 end
 
                 return false
