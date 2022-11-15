@@ -469,7 +469,6 @@ function PRD:InitializePersonalResourceDisplay()
     local barPriorities = {}
     
     for barPriority, progressBarConfig in pairs(config) do
-        print(progressBarConfig.heightWeight)
         table.insert(barPriorities, barPriority)
         if type(progressBarConfig.enabled) == "function" or progressBarConfig.enabled then
             totalWeight = totalWeight + progressBarConfig.heightWeight
@@ -482,9 +481,7 @@ function PRD:InitializePersonalResourceDisplay()
     for _, progressBarPriority in ipairs(barPriorities) do
         local progressBarConfig = config[progressBarPriority]
 
-        print(progressBarPriority)
         if type(progressBarConfig.enabled) == "function" or progressBarConfig.enabled then
-            print(progressBarConfig.enabled)
             if progressBarConfig.powerType == Enum.PowerType.Runes then
                 for runeIndex=1, 6 do
                     PRD:InitializeRuneProgressBar(progressBarPriority, progressBarConfig, runeIndex, processedWeight, totalWeight)
