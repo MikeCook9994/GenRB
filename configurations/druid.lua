@@ -1,25 +1,45 @@
 PRD.configurations.druid = {
     [1] = {
         heightWeight = 5,
-        powerType_events = { "UNIT_AURA" },
+        powerType_events = { "UPDATE_SHAPESHIFT_FORM" },
         powerType = function(cache, event, ...)
-            if event == "INITIAL" or (event == "UNIT_AURA" and select(1, ...) == "player") then
+            if event == "INITIAL" or (event == "UPDATE_SHAPESHIFT_FORM") then
                 if PRD:GetUnitBuff("player", 24858) ~= nil then
+                    if cache.powerType == Enum.PowerType.LunarPower then
+                        return false
+                    end
+                    
                     cache.stanceId = 24858
                     cache.powerType = Enum.PowerType.LunarPower
                     return true, Enum.PowerType.LunarPower
                 elseif PRD:GetUnitBuff("player", 5487) ~= nil then
+                    if cache.powerType == Enum.PowerType.Rage then
+                        return false
+                    end
+
                     cache.stanceId = 5487
                     cache.powerType = Enum.PowerType.Rage
                     return true, Enum.PowerType.Rage
                 elseif PRD:GetUnitBuff("player", 768) ~= nil then
+                    if cache.powerType == Enum.PowerType.Energy then
+                        return false
+                    end
+
                     cache.stanceId = 768
                     cache.powerType = Enum.PowerType.Energy
                     return true, Enum.PowerType.Energy
                 elseif PRD:GetUnitBuff("player", 197625) ~= nil then
+                    if cache.powerType == Enum.PowerType.Mana then
+                        return false
+                    end
+                    
                     cache.stanceId = 197625
                     cache.powerType = Enum.PowerType.Mana
                     return true, Enum.PowerType.Mana
+                end
+
+                if cache.powerType == Enum.PowerType.Mana then
+                    return false
                 end
 
                 cache.stanceId = nil
@@ -191,21 +211,27 @@ PRD.configurations.druid = {
     [2] = {
         heightWeight = 1,
         powerType = Enum.PowerType.ComboPoints,
-        enabled_events = { "PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED", "UNIT_AURA" },
+        enabled_events = { "UPDATE_SHAPESHIFT_FORM" },
         enabled = function(cache, event, ...)
-            if event == "PLAYER_SPECIALIZATION_CHANGED" or event == "INITIAL" then
+            if event == "INITIAL" then
                 cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
+                cache.formId = GetShapeshiftForm()
             end
 
-            if (event == "UNIT_AURA" and select(1, ...) == "player") or event == "INITIAL" then
-                cache.catFormActive = PRD:GetUnitBuff("player", 768) ~= nil
+            local specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
+            local formId = GetShapeshiftForm()
+
+            local isShowing = cache.specializationId == 103 or cache.formId == 2
+            local shouldShow = specializationId == 103 or formId == 2
+            
+            if isShowing == shouldShow and event == "UPDATE_SHAPESHIFT_FORM" then
+                return false
             end
 
-            local balanceWithFeralAffinity = (cache.specializationId == 102) and select(4, GetTalentInfo(3, 1, 1))
-            local guardianWithFeralAffinity = (cache.specializationId == 104) and select(4, GetTalentInfo(3, 2, 1))
-            local restorationWithFeralAffinity = (cache.specializationId == 105) and select(4, GetTalentInfo(3, 2, 1))
-            local feralSpec = cache.specializationId == 103
-            return true, cache.catFormActive and (feralSpec or balanceWithFeralAffinity or guardianWithFeralAffinity or restorationWithFeralAffinity)
+            cache.specializationId = specializationId
+            cache.formId = formId
+
+            return true, shouldShow
         end,
         color = { r = 1.0, g = 0.65, b = 0.0 },
         tickMarks = {
@@ -221,29 +247,25 @@ PRD.configurations.druid = {
     [0] = {
         heightWeight = 1,
         powerType = Enum.PowerType.Mana,
-        enabled_events = { "UNIT_AURA", "PLAYER_SPECIALIZATION_CHANGED" },
+        enabled_events = { "UPDATE_SHAPESHIFT_FORM"  },
         enabled = function(cache, event, ...)
-            if event == "INITIAL" or event == "PLAYER_SPECIALIZATION_CHANGED" then
+            if event == "INITIAL" then
                 cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
+                cache.formId = GetShapeshiftForm()
             end
 
-            if PRD:GetUnitBuff("player", 24858) ~= nil then
-                cache.stanceId = 24858
-                return true, true
-            elseif PRD:GetUnitBuff("player", 5487) ~= nil then
-                cache.stanceId = 5487
-                return true, true
-            elseif PRD:GetUnitBuff("player", 768) ~= nil then
-                cache.stanceId = 768
-                return true, true
-            elseif PRD:GetUnitBuff("player", 197625) ~= nil then
-                cache.stanceId = 197625
-                if cache.specializationId == 102 then
-                    return true, true
-                end
+            local specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
+            local formId = GetShapeshiftForm()
 
-                return true, false
+            local isShowing = cache.specializationId ~= 105 or (cache.formId == 1 or cache.formId == 2)
+            local shouldShow = specializationId ~= 105 or (formId == 1 or formId == 2)
+
+            if isShowing == shouldShow and event == "UPDATE_SHAPESHIFT_FORM" then
+                return false
             end
+
+            cache.specializationId = specializationId
+            cache.formId = formId
 
             return true, false
         end,
@@ -257,18 +279,6 @@ PRD.configurations.druid = {
             offsets = function(cache, event, ...)
                 local resourceValues = { }
 
-                if event == "UNIT_MAXPOWER" then
-                    cache.specializationId = select(1, GetSpecializationInfo(GetSpecialization()))
-                end
-
-                if cache.specializationId == 105 then
-                    if event == "INITIAL" then
-                        return true, resourceValues
-                    end
-
-                    return false
-                end
-
                 local spellCost = GetSpellPowerCost(8936)[1].cost
                 if (spellCost == 0) then
                     return true, resourceValues
@@ -276,7 +286,7 @@ PRD.configurations.druid = {
 
                 local currentMaxTick = 0
 
-                while currentMaxTick + spellCost <= cache.maxPower do
+                while currentMaxTick + spellCost < cache.maxPower do
                     currentMaxTick = currentMaxTick + spellCost
                     table.insert(resourceValues, currentMaxTick)
                 end
@@ -287,7 +297,7 @@ PRD.configurations.druid = {
         text = {
             value_dependencies = { "currentPower", "maxPower", "enabled" },
             value = function(cache, event, ...)
-                if cache.specializationId == 105 then
+                if select(1, GetSpecializationInfo(GetSpecialization())) == 105 then
                     return true, (("%%.%df"):format(2):format((cache.currentPower / cache.maxPower)) * 100) .. "%"
                 end
 

@@ -128,9 +128,7 @@ function PRD:GetConfiguration()
         end
 
         barConfig.enabled = barConfig.enabled == nil or barConfig.enabled
-        print(barConfig.heightWeight)
         barConfig.heightWeight = (barConfig.heightWeight ~= nil and barConfig.heightWeight) or 1
-        print(barConfig.heightWeight)
         barConfig.color = (barConfig.color ~= nil and barConfig.color) or { r = powerTypeColor.r, g = powerTypeColor.g, b = powerTypeColor.b }
         barConfig.texture = (barConfig.texture ~= nil and barConfig.texture) or "Interface\\Addons\\SharedMedia\\statusbar\\Cilo"
 

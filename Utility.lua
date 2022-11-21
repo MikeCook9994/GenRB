@@ -29,8 +29,8 @@ function PRD:ConvertPowerTypeStringToEnumValue(powerType)
 end
 
 function PRD:DebugPrint(strName, data) 
-  if ViragDevTool_AddData and PRD.debugEnabled then 
-      ViragDevTool_AddData(data, strName) 
+  if ViragDevTool.AddData and PRD.debugEnabled then 
+      ViragDevTool:AddData(data, strName)
   end 
 end
 

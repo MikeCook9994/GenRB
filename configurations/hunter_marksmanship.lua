@@ -1,5 +1,5 @@
 PRD.configurations.hunter_marksmanship = {
-    primary = {
+    [0] = {
         tickMarks = {
             offsets = {
                 arcane_shot = {

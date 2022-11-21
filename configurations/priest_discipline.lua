@@ -1,8 +1,8 @@
 PRD.configurations.priest_discipline = {
-    primary = {
+    [0] = {
         color = { r = 1.0, g = 1.0, b = 1.0 }
     },
-    top = {
+    [1] = {
         currentPower_events = { "SPELL_UPDATE_CHARGES" },
         currentPower = function(cache, event, ...)
             local currentCharges, maxCharges, start, duration = GetSpellCharges(194509)

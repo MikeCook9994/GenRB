@@ -1,5 +1,5 @@
 PRD.configurations.priest_shadow = {
-    primary = {
+    [1] = {
         powerType = Enum.PowerType.Insanity,
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...) 
@@ -90,7 +90,7 @@ PRD.configurations.priest_shadow = {
             }
         }
     },
-    top = {
+    [0] = {
         powerType = Enum.PowerType.Mana,
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },

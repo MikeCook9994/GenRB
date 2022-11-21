@@ -136,17 +136,17 @@ local specresources = {
                 primary = "astral power",
                 bottom = "mana"
             },
-            [5] = {
+            [1] = {
                 primary = "rage",
                 bottom = "mana",
                 top = "astral power"
             },
-            [1] = {
+            [2] = {
                 primary = "energy",
                 bottom = "astral power",
                 top = "combo points"
             },
-            [31] = {
+            [4] = {
                 primary = "astral power",
                 bottom = "mana"
             }
@@ -157,17 +157,17 @@ local specresources = {
                 primary = "energy",
                 bottom = "mana"
             },
-            [5] = {
+            [1] = {
                 top = "combo points",
                 primary = "rage",
                 bottom = "energy"
             },
-            [1] = {
+            [2] = {
                 top = "combo points",
                 primary = "energy",
                 bottom = "mana"
             },
-            [31] = {
+            [4] = {
                 top = "combo points",
                 primary = "energy",
                 bottom = "mana"
@@ -178,16 +178,16 @@ local specresources = {
                 primary = "rage",
                 bottom = "mana"
             },
-            [5] = {
+            [1] = {
                 primary = "rage",
                 bottom = "mana"
             },
-            [1] = {
+            [2] = {
                 top = "combo points",
                 primary = "energy",
                 bottom = "rage"
             },
-            [31] = {
+            [4] = {
                 primary = "rage",
                 bottom = "mana"
             }
@@ -196,16 +196,16 @@ local specresources = {
             [0] = {
                 primary = "mana"
             },
-            [5] = {
+            [1] = {
                 primary = "rage",
                 bottom = "mana"
             },
-            [1] = {
+            [2] = {
                 top = "combo points",
                 primary = "energy",
                 bottom = "mana"
             },
-            [31] = {
+            [4] = {
                 primary = "mana"
             }
         },
