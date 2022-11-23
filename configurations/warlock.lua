@@ -1,5 +1,6 @@
 PRD.configurations.warlock = {
-    primary = {
+    [1] = {
+        heightWeight = 5,
         currentPower_events = { "UNIT_POWER_FREQUENT" },
         currentPower = function(cache, event, ...)
             if event == "INITIAL" or select(1, ...) == "player" then
@@ -15,8 +16,17 @@ PRD.configurations.warlock = {
         end,
         tickMarks = {
             color = { r = 1.0, g = 1.0, b = 1.0},
-            offsets = { 10, 20, 30, 40 }
-        },
+            offsets_dependencies = { "maxPower" },
+            offsets = function(cache, event, ...) 
+                local offsets = { }
+
+                for i = 1, (cache.maxPower / 10) - 1, 1 do
+                    table.insert(offsets, i * 10)
+                end
+
+                return true, offsets
+            end
+        }
         text = {
             value_dependencies = { "currentPower" },
             value = function(cache, event, ...) 
@@ -27,7 +37,6 @@ PRD.configurations.warlock = {
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...)
             if 267 == select(1, GetSpecializationInfo(GetSpecialization())) then
-                PRD:DebugPrint("cache", cache)
                 if cache.currentPower >= 45 then
                     return true, { r = 0.5, g = 0.0, b = 0.0 }
                 elseif cache.currentPower >= 40 then
@@ -40,7 +49,8 @@ PRD.configurations.warlock = {
             return true, PowerBarColor[Enum.PowerType.SoulShards]
         end 
     },
-    bottom = {
+    [0] = {
+        heightWeight = 1,
         text = {
             enabled = false
         },

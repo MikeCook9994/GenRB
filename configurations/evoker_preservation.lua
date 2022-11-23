@@ -1,6 +1,5 @@
 PRD.configurations.evoker_preservation = {
     [1] = {
-        heightWeight = 3,
         currentPower_events = { "UNIT_POWER_FREQUENT" },
         currentPower = function(cache, event, ...)
             if event == "UNIT_POWER_FREQUENT" and (select(1, ...) ~= "player" or select(2, ...) ~= "ESSENCE") then
@@ -34,7 +33,6 @@ PRD.configurations.evoker_preservation = {
         }
     },
     [0] = {
-        heightWeight = 3,
         powerType = Enum.PowerType.Mana
     }
 }

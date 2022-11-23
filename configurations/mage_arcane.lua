@@ -1,9 +1,10 @@
 PRD.configurations.mage_arcane = {
-    top = {
+    [1] = {
+        heightWeight = 1,
         powerType = Enum.PowerType.ArcaneCharges,
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...)
-            local name = PRD:GetUnitBuff("player", 264774)
+            local name = PRD:GetPlayerBuff(264774)
 
             if name ~= nil then
                 return true, { r = 0.75, g = 0.3, b = 1.0 }
@@ -15,22 +16,9 @@ PRD.configurations.mage_arcane = {
             offsets = { 1, 2, 3 }
         }
     },
-    primary = {
+    [0] = {
+        heightWeight = 5,
         color = { r = 0.5, g = 0.0, b = 1.0 },
-        tickMarks = {
-            offsets = {
-                enlightened = {
-                    enabled_events = { "PLAYER_TALENT_UPDATE" },
-                    enabled = function(cache, event, ...) 
-                        return true, select(4, GetTalentInfo(7, 3, 1)) and true or false                    
-                    end,
-                    resourceValue_events = { "UNIT_MAXPOWER" },
-                    resourceValue = function(cache, event, ...)
-                        return true, .7 * UnitPowerMax("player", cache.powerType)
-                    end
-                }
-            }
-        },
         text = {
             enabled_dependencies = { "currentPower" },
             enabled = function(cache, event, ...)

@@ -1,9 +1,10 @@
 PRD.configurations.shaman_elemental = {
-    primary = {
+    [1] = {
+        heightWeight = 5,
         powerType = Enum.PowerType.Maelstrom,
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)
-            local r, g, b =  GetClassColor(select(2, UnitClass("player")))
+            local r, g, b =  GetClassColor("SHAMAN")
             local color = { r = r, g = g, b = b }
 
             if cache.currentPower == cache.maxPower then
@@ -19,7 +20,7 @@ PRD.configurations.shaman_elemental = {
         prediction = {
             color_dependencies = { "next" },
             color = function(cache, event, ...)
-                local r, g, b =  GetClassColor(select(2, UnitClass("player")))
+                local r, g, b = GetClassColor("SHAMAN")
                 local color = { r = r, g = g, b = b }
 
                 if cache.predictedPower == cache.maxPower then
@@ -61,7 +62,7 @@ PRD.configurations.shaman_elemental = {
                         cache.predictedPowerGain = 12
                     end 
                     
-                    cache.predictedPower = cache.currentPower + cache.predictedPowerGain   
+                    cache.predictedPower = cache.currentPower + cache.predictedPowerGain
                     cache.predictedPower = math.max(cache.predictedPower, 0)
                     cache.predictedPower = math.min(cache.predictedPower, cache.maxPower)
                     
@@ -100,7 +101,8 @@ PRD.configurations.shaman_elemental = {
             }
         }
     },
-    top = {
+    [0] = {
+        heightWeight = 1,
         powerType = Enum.PowerType.Mana,
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },
@@ -132,9 +134,9 @@ PRD.configurations.shaman_elemental = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -140,
-            yOffset = -5,
-            size = 15
+            xOffset = -220,
+            yOffset = -6,
+            size = 16
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

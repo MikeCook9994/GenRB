@@ -1,12 +1,13 @@
 PRD.configurations.mage_frost = {
-    primary = {
+    [1] = {
+        heightWeight = 5
         currentPower_events = { "UNIT_AURA" },
         currentPower = function(cache, event, ...)
             if event == "UNIT_AURA" and select(1, ...) ~= "player" then  
                 return false
             end
 
-            local name, _, count, _, duration, expirationTime = PRD:GetUnitBuff("player", 205473)
+            local name, _, count, _, duration, expirationTime = PRD:GetPlayerBuff(205473)
         
             if name == nil then
                 cache.currentPower = 0
@@ -23,7 +24,8 @@ PRD.configurations.mage_frost = {
             offsets = { 1, 2, 3, 4 }
         }
     },
-    bottom = {
+    [0] = {
+        heightWeight = 1
         powerType = Enum.PowerType.Mana,
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },
@@ -55,9 +57,9 @@ PRD.configurations.mage_frost = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -100,
-            yOffset = 5,
-            size = 15
+            xOffset = -220,
+            yOffset = 6,
+            size = 16
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

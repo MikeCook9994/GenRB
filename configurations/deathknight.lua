@@ -32,11 +32,12 @@ PRD.configurations.deathknight = {
         end,
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...)
+            local r, g, b = GetClassColor("DEATHKNIGHT")
+
             if cache.cooling then
-                return true, { r = 0.5, g = 0.125, b = 0.125 }
+                return true, { r = r / 2, g = g / 2, b = b / 2 }
             end
 
-            local r, g, b = GetClassColor("DEATHKNIGHT")
             return true, { r = r, g = g, b = b }
         end,
         text = {
@@ -67,32 +68,14 @@ PRD.configurations.deathknight = {
                     resourceValue = 25,
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED" },
                     enabled = function(cache, event, ...)
-                        if event == "UNIT_AURA" and select(1, ...) ~= "player" then
-                            return false
-                        end
-
                         return true, 251 == select(1, GetSpecializationInfo(GetSpecialization()))
                     end,
                     color = { r = 0.75, g = 0.75, b = 1.0 }
-                },
-                glacial_advance_epidemic = {
-                    enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
-                    enabled = function(cache, event, ...) 
-                        local specId = select(1, GetSpecializationInfo(GetSpecialization()))
-                        local glacialAdvanceTalented = (251 == specId) and (select(4, GetTalentInfo(6, 2, 1)) and true or false)
-                        return true, glacialAdvanceTalented or specId == 252
-                    end,
-                    resourceValue = 30,
-                    color = { r = 0.75, g = 1.0, b = 1.0 }
                 },
                 death_coil = {
                     resourceValue = 40,
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED" },
                     enabled = function(cache, event, ...)
-                        if event == "UNIT_AURA" and select(1, ...) ~= "player" then
-                            return false
-                        end
-
                         return true, 252 == select(1, GetSpecializationInfo(GetSpecialization()))
                     end,
                     color = { r = 0.75, g = 1.0, b = 0.75 }
@@ -104,7 +87,7 @@ PRD.configurations.deathknight = {
                             return false
                         end
 
-                        return true, (250 ~= select(1, GetSpecializationInfo(GetSpecialization())) and 35) or select(1, PRD:GetUnitBuff('player', 219788)) == nil and 45 or 40
+                        return true, (250 ~= select(1, GetSpecializationInfo(GetSpecialization())) and 35) or select(1, PRD:GetPlayerBuff(219788)) == nil and 45 or 40
                     end,
                     color = { r = 1.0, g = 0.75, b = 0.75 }
                 },
@@ -112,7 +95,7 @@ PRD.configurations.deathknight = {
                     enabled_events = { "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE" },
                     enabled = function(cache, event, ...) 
                         return true, (250 == select(1, GetSpecializationInfo(GetSpecialization()))) and (select(4, GetTalentInfo(7, 3, 1)) and true or false)
-                    end,    
+                    end,
                     resourceValue = 100,
                     color = { r = 1.0, g = 1.0, b = 1.0 }
                 }

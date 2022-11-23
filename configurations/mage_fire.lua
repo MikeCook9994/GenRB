@@ -1,5 +1,6 @@
 PRD.configurations.mage_fire = {
-    primary = {
+    [1] = {
+        heightWeight = 5,
         currentPower_events = { "SPELL_UPDATE_CHARGES" },
         currentPower = function(cache, event, ...)
             local currentCharges, maxCharges, start, duration = GetSpellCharges(108853)
@@ -49,7 +50,8 @@ PRD.configurations.mage_fire = {
             end
         }
     },
-    bottom = {
+    [0] = {
+        heightWeight = 1,
         powerType = Enum.PowerType.Mana,
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },
@@ -81,9 +83,9 @@ PRD.configurations.mage_fire = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -100,
-            yOffset = 5,
-            size = 15
+            xOffset = -220,
+            yOffset = 6,
+            size = 16
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

@@ -1,5 +1,6 @@
 PRD.configurations.priest_shadow = {
     [1] = {
+        heightWeight = 5,
         powerType = Enum.PowerType.Insanity,
         color_dependencies = { "currentPower" },
         color = function(cache, event, ...) 
@@ -54,7 +55,7 @@ PRD.configurations.priest_shadow = {
                     end 
                     
                     -- stm buff
-                    if PRD:GetUnitBuff("player", 298357) ~= nil then
+                    if PRD:GetPlayerBuff(298357) ~= nil then
                         cache.predictedPowerGain = cache.predictedPowerGain * 2
                     end
                     
@@ -91,6 +92,7 @@ PRD.configurations.priest_shadow = {
         }
     },
     [0] = {
+        heightWeight = 1,
         powerType = Enum.PowerType.Mana,
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },

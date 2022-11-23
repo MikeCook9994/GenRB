@@ -1,20 +1,24 @@
 PRD.configurations.monk_windwalker = {
-    top = {
+    [2] = {
+        heightWeight = 2,
         powerType = Enum.PowerType.Chi,
         texture = "Interface\\Addons\\SharedMedia\\statusbar\\Darkbottom",
         text = {
-            xOffset = 100,
-            yOffset = -5,
-            size = 15
+            size = 25
         },
         tickMarks = {
             offsets = { 1, 2, 3, 4, 5 }
         }
     },
-    bottom = {
+    [1] = {
+        heightWeight = 4,
+        powerType = Enum.PowerType.Energy
+    }
+    [0] = {
+        heightWeight = 1,
         powerType = Enum.PowerType.Mana,
         color = function(cache, event, ...)
-            local r, g, b =  GetClassColor(select(2, UnitClass("player")))
+            local r, g, b =  GetClassColor("MONK")
             return true, { r = r, g = g, b = b }
         end,
         tickMarks = {
@@ -47,9 +51,9 @@ PRD.configurations.monk_windwalker = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -100,
-            yOffset = 5,
-            size = 15
+            xOffset = -220,
+            yOffset = 6,
+            size = 16
         }
     }
 }

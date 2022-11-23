@@ -4,7 +4,7 @@ PRD.configurations.druid = {
         powerType_events = { "UPDATE_SHAPESHIFT_FORM" },
         powerType = function(cache, event, ...)
             if event == "INITIAL" or (event == "UPDATE_SHAPESHIFT_FORM") then
-                if PRD:GetUnitBuff("player", 24858) ~= nil then
+                if PRD:GetPlayerBuff(24858) ~= nil then
                     if cache.powerType == Enum.PowerType.LunarPower then
                         return false
                     end
@@ -12,7 +12,7 @@ PRD.configurations.druid = {
                     cache.stanceId = 24858
                     cache.powerType = Enum.PowerType.LunarPower
                     return true, Enum.PowerType.LunarPower
-                elseif PRD:GetUnitBuff("player", 5487) ~= nil then
+                elseif PRD:GetPlayerBuff(5487) ~= nil then
                     if cache.powerType == Enum.PowerType.Rage then
                         return false
                     end
@@ -20,7 +20,7 @@ PRD.configurations.druid = {
                     cache.stanceId = 5487
                     cache.powerType = Enum.PowerType.Rage
                     return true, Enum.PowerType.Rage
-                elseif PRD:GetUnitBuff("player", 768) ~= nil then
+                elseif PRD:GetPlayerBuff(768) ~= nil then
                     if cache.powerType == Enum.PowerType.Energy then
                         return false
                     end
@@ -28,7 +28,7 @@ PRD.configurations.druid = {
                     cache.stanceId = 768
                     cache.powerType = Enum.PowerType.Energy
                     return true, Enum.PowerType.Energy
-                elseif PRD:GetUnitBuff("player", 197625) ~= nil then
+                elseif PRD:GetPlayerBuff(197625) ~= nil then
                     if cache.powerType == Enum.PowerType.Mana then
                         return false
                     end
@@ -301,7 +301,7 @@ PRD.configurations.druid = {
                     return true, (("%%.%df"):format(2):format((cache.currentPower / cache.maxPower)) * 100) .. "%"
                 end
 
-                if select(1, PRD:GetUnitBuff("player", 69369)) ~= nil then
+                if select(1, PRD:GetPlayerBuff(69369)) ~= nil then
                     return true, "Free"
                 end
 

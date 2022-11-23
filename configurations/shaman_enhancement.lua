@@ -1,7 +1,8 @@
 PRD.configurations.shaman_enhancement = {
-    primary = {
+    [1] = {
+        heightWeight = 5,
         color = function(cache, event, ...)
-            local r, g, b =  GetClassColor(select(2, UnitClass("player")))
+            local r, g, b =  GetClassColor("SHAMAN")
             return true, { r = r, g = g, b = b }
         end,
         currentPower_events = { "UNIT_AURA" },
@@ -12,7 +13,7 @@ PRD.configurations.shaman_enhancement = {
                 return false
             end
 
-            local name, _, count, _ = PRD:GetUnitBuff("player", 187881)
+            local name, _, count, _ = PRD:GetPlayerBuff(187881)
         
             if name == nil then
                 cache.currentPower = 0
@@ -31,11 +32,21 @@ PRD.configurations.shaman_enhancement = {
             end
         },
         tickMarks = {
-            offsets = { 1, 2, 3, 4, 5, 6, 7, 8, 9 },
             color = { r = 1.0, g = 1.0, b = 1.0}
+            offsets_dependencies = { "maxPower" },
+            offsets = function(cache, event, ...) 
+                local offsets = { }
+
+                for i = 1, cache.maxPower - 1, 1 do
+                    table.insert(offsets, i)
+                end
+
+                return true, offsets
+            end
         }
     },
-    top = {
+    [0] = {
+        heightWeight = 1,
         powerType = Enum.PowerType.Mana,
         tickMarks = {
             color = { r = 0.5, g = 0.5, b = 0.5 },
@@ -67,9 +78,9 @@ PRD.configurations.shaman_enhancement = {
 
                 return true, math.floor(cache.currentPower / spellCost)
             end,
-            xOffset = -140,
-            yOffset = -5,
-            size = 15
+            xOffset = -220,
+            yOffset = 6,
+            size = 16
         },
         color_dependencies = { "currentPower", "maxPower" },
         color = function(cache, event, ...)

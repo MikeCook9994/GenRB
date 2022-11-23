@@ -1,27 +1,27 @@
 local PRD = PRD
 local UnitAura = UnitAura
 
-function PRD:GetUnitAura(unit, spell, filter)
+function PRD:GetPlayerAura(unitspell, filter)
   if filter and not filter:upper():find("FUL") then
       filter = filter.."|HELPFUL"
   end
   for i = 1, 255 do
-    local name, _, _, _, _, _, _, _, _, spellId = UnitAura(unit, i, filter)
+    local name, _, _, _, _, _, _, _, _, spellId = UnitAura("player", i, filter)
     if not name then return end
     if spell == spellId or spell == name then
-      return UnitAura(unit, i, filter)
+      return UnitAura("player", i, filter)
     end
   end
 end
 
-function PRD:GetUnitBuff(unit, spell, filter)
+function PRD:GetPlayerBuff(spell, filter)
   filter = filter and filter.."|HELPFUL" or "HELPFUL"
-  return PRD:GetUnitAura(unit, spell, filter)
+  return PRD:GetUnitAura(spell, filter)
 end
 
-function PRD:GetUnitDebuff(unit, spell, filter)
+function PRD:GetPlayerDebuff(spell, filter)
   filter = filter and filter.."|HARMFUL" or "HARMFUL"
-  return PRD:GetUnitAura(unit, spell, filter)
+  return PRD:GetUnitAura(spell, filter)
 end
 
 function PRD:ConvertPowerTypeStringToEnumValue(powerType)

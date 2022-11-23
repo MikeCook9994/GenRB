@@ -84,13 +84,12 @@ PRD.configurations.druid_feral = {
             end
         },
         text = {
-            enabled_dependencies = { "powerType" },
-            enabled = function(cache, event, ...)
-                return true, cache.powerType == Enum.PowerType.Mana
-            end,
-            value_dependencies = { "currentPower", "maxPower", "enabled" },
+            value_dependencies = { "currentPower", "maxPower", "powerType" },
             value = function(cache, event, ...)
-                if select(1, PRD:GetUnitBuff("player", 69369)) ~= nil then
+                if cache.powerType == Enum.PowerType.Energy then
+                    return true, cache.currentPower
+
+                if select(1, PRD:GetPlayerBuff(69369)) ~= nil then
                     return true, "Free"
                 end
 
@@ -105,8 +104,12 @@ PRD.configurations.druid_feral = {
             yOffset = 6,
             size = 16
         },
-        color_dependencies = { "currentPower", "maxPower" },
+        color_dependencies = { "currentPower", "maxPower", "powerType" },
         color = function(cache, event, ...)
+            if cache.powerType == Enum.PowerType.Energy then
+                return PowerBarColor[Enum.PowerType.Energy]
+            end
+
             local percent = cache.currentPower / cache.maxPower
             return true, { r = 1.0 * (1 - percent), g = 0.0, b = 1.0 * percent }
         end
